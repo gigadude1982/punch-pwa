@@ -23,9 +23,12 @@ export function createInitialState(now: number): PetState {
  * floored at zero so a stale/clock-skewed `lastTick` can't raise stats.
  */
 export function applyDecay(state: PetState, now: number): PetState {
-  const elapsedMinutes = Math.max(0, (now - state.lastTick) / MS_PER_MINUTE);
+  const elapsedMinutes = (now - state.lastTick) / MS_PER_MINUTE;
   if (elapsedMinutes === 0) {
     return state;
+  }
+  if (elapsedMinutes < 0) {
+    return { ...state, lastTick: now };
   }
   const fullness = clamp(state.fullness - elapsedMinutes * FULLNESS_DECAY_PER_MINUTE);
   return { ...state, fullness, lastTick: now };
