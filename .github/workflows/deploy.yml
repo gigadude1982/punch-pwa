@@ -1,5 +1,8 @@
 name: Deploy punch-pwa to S3
 
+permissions:
+  contents: read
+
 # Deploys the built app to the dev/staging bucket (punch.gigacorp.co) on every
 # push to main. Production (punchtamagotchi.com) is intentionally left on the
 # coming-soon landing and is NOT touched by this workflow. Target bucket and
