@@ -21,3 +21,8 @@ yarn-error.log*
 
 # PWA build artifacts
 dev-dist
+
+# TypeScript build artifacts (from `tsc -b`)
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
