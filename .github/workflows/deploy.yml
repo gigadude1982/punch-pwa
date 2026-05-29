@@ -1,0 +1,36 @@
+name: Deploy punch-pwa to S3
+
+permissions:
+  contents: read
+
+# Deploys the built app to the dev/staging bucket (punch.gigacorp.co) on every
+# push to main. Production (punchtamagotchi.com) is intentionally left on the
+# coming-soon landing and is NOT touched by this workflow. Target bucket and
+# distribution are driven by repo secrets, mirroring gigacorp-react's deploy.
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+      - run: npm run ci-cd
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - run: aws s3 sync ./dist s3://${{ secrets.AWS_S3_BUCKET }} --delete
+      - run: aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
