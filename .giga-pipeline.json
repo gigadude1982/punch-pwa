@@ -1,8 +1,11 @@
 {
-  "language": "javascript",
+  "language": "typescript",
   "test_framework": "jest",
-  "test_command": "npm test -- --watchAll=false",
+  "test_command": "npm test",
+  "coding_standards": "TypeScript + React 18 function components with hooks ONLY — no class components, and NO PropTypes (type props with TS interfaces/types). Use the React 17+ automatic JSX transform (do not add `import React` just for JSX). Style with CSS Modules (*.module.css); no inline style objects for layout. Use framer-motion for animation. Persist game state to localStorage. Prefer named exports and small, single-responsibility components. Avoid `any` — type all props, state, hooks, and function signatures. Colocate a *.test.tsx beside each component using Jest + React Testing Library: render/screen, @testing-library/user-event for interactions, jest-dom matchers; assert observable behavior, not implementation details. Match the repo's .prettierrc and ESLint (.eslintrc.cjs) rules exactly.",
   "source_dirs": ["src"],
   "test_dirs": ["src"],
-  "branch_prefix": "auto/"
+  "branch_prefix": "auto/",
+  "write_tests": true,
+  "code_history_hybrid": true
 }
