@@ -1,0 +1,36 @@
+.playButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: #e50914;
+  color: #ffffff;
+  cursor: pointer;
+  transition:
+    opacity 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.05s ease;
+}
+
+.playButton:hover {
+  opacity: 0.85;
+  box-shadow: 0 0 12px rgba(229, 9, 20, 0.6);
+}
+
+.playButton:active {
+  transform: scale(0.96);
+}
+
+.playButton:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.icon {
+  display: block;
+  fill: #ffffff;
+}
