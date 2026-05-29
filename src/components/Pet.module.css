@@ -1,0 +1,20 @@
+.pet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sprite {
+  font-size: 6rem;
+  line-height: 1;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.25));
+  user-select: none;
+}
+
+.mood {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #5a3a1a;
+}

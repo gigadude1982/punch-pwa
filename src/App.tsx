@@ -1,12 +1,14 @@
+import { Game } from "./components/Game";
+import { GameProvider } from "./game/GameProvider";
 import styles from "./App.module.css";
 
 function App() {
   return (
     <main className={styles.app}>
-      <h1 className={styles.title}>Punch</h1>
-      <p className={styles.tagline} data-testid="placeholder-tagline">
-        Scaffold ready. PUNCH-1 will build the game shell here.
-      </p>
+      <h1 className={styles.title}>Punch 🦧</h1>
+      <GameProvider>
+        <Game />
+      </GameProvider>
     </main>
   );
 }

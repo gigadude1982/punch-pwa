@@ -1,0 +1,28 @@
+.meter {
+  width: min(20rem, 80vw);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #5a3a1a;
+}
+
+.track {
+  height: 1rem;
+  border-radius: 999px;
+  background: #e7d8c4;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #f4a900, #ffd23f);
+  transition: width 300ms ease;
+}
