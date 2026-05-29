@@ -1,0 +1,8 @@
+{
+  "language": "javascript",
+  "test_framework": "jest",
+  "test_command": "npm test -- --watchAll=false",
+  "source_dirs": ["src"],
+  "test_dirs": ["src"],
+  "branch_prefix": "auto/"
+}
