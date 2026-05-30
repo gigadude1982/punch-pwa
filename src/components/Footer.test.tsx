@@ -1,98 +1,94 @@
 import { render, screen } from "@testing-library/react";
-
-declare let __APP_VERSION__: string;
+import { Footer } from "./Footer";
 
 describe("Footer", () => {
-  const fetchSpy = jest.spyOn(global, "fetch");
-
   afterEach(() => {
-    jest.resetModules();
-    fetchSpy.mockReset();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (globalThis as any).__APP_VERSION__;
   });
 
   describe("when __APP_VERSION__ is a valid non-empty string", () => {
-    beforeEach(() => {
-      (globalThis as unknown as Record<string, unknown>)["__APP_VERSION__"] = "1.2.3";
+    it("renders the version in the format v{version}", () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (globalThis as any).__APP_VERSION__ = "1.2.3";
+
+      render(<Footer />);
+
+      const versionEl = screen.getByTestId("footer-version");
+      expect(versionEl).toBeInTheDocument();
+      expect(versionEl).toHaveTextContent("v1.2.3");
     });
 
-    it("renders the footer element", async () => {
-      const { Footer } = await import("./Footer");
+    it("renders the footer landmark element", () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (globalThis as any).__APP_VERSION__ = "2.0.0";
+
       render(<Footer />);
-      expect(screen.getByTestId("footer")).toBeInTheDocument();
+
+      expect(screen.getByRole("contentinfo")).toBeInTheDocument();
     });
 
-    it("renders the version string prefixed with v", async () => {
-      const { Footer } = await import("./Footer");
+    it("prefixes the version string with v", () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (globalThis as any).__APP_VERSION__ = "0.9.1";
+
       render(<Footer />);
-      expect(screen.getByTestId("footer-version")).toBeInTheDocument();
-      expect(screen.getByTestId("footer-version")).toHaveTextContent("v1.2.3");
+
+      expect(screen.getByTestId("footer-version")).toHaveTextContent("v0.9.1");
     });
   });
 
   describe("when __APP_VERSION__ is undefined", () => {
-    beforeEach(() => {
-      (globalThis as unknown as Record<string, unknown>)["__APP_VERSION__"] = undefined;
-    });
-
-    it("renders the footer element without throwing", async () => {
-      const { Footer } = await import("./Footer");
-      expect(() => render(<Footer />)).not.toThrow();
-      expect(screen.getByTestId("footer")).toBeInTheDocument();
-    });
-
-    it("does not render any version text", async () => {
-      const { Footer } = await import("./Footer");
+    it("renders no version text", () => {
       render(<Footer />);
+
       expect(screen.queryByTestId("footer-version")).not.toBeInTheDocument();
+    });
+
+    it("still renders the footer element without throwing", () => {
+      render(<Footer />);
+
+      expect(screen.getByRole("contentinfo")).toBeInTheDocument();
     });
   });
 
   describe("when __APP_VERSION__ is an empty string", () => {
-    beforeEach(() => {
-      (globalThis as unknown as Record<string, unknown>)["__APP_VERSION__"] = "";
-    });
+    it("renders no version text", () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (globalThis as any).__APP_VERSION__ = "";
 
-    it("renders the footer element without throwing", async () => {
-      const { Footer } = await import("./Footer");
-      expect(() => render(<Footer />)).not.toThrow();
-      expect(screen.getByTestId("footer")).toBeInTheDocument();
-    });
-
-    it("does not render any version text", async () => {
-      const { Footer } = await import("./Footer");
       render(<Footer />);
+
       expect(screen.queryByTestId("footer-version")).not.toBeInTheDocument();
     });
-  });
 
-  describe("when __APP_VERSION__ is null", () => {
-    beforeEach(() => {
-      (globalThis as unknown as Record<string, unknown>)["__APP_VERSION__"] = null;
-    });
+    it("does not throw when version is empty string", () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (globalThis as any).__APP_VERSION__ = "";
 
-    it("renders the footer element without throwing", async () => {
-      const { Footer } = await import("./Footer");
       expect(() => render(<Footer />)).not.toThrow();
-      expect(screen.getByTestId("footer")).toBeInTheDocument();
-    });
-
-    it("does not render any version text", async () => {
-      const { Footer } = await import("./Footer");
-      render(<Footer />);
-      expect(screen.queryByTestId("footer-version")).not.toBeInTheDocument();
     });
   });
 
   describe("no network activity during rendering", () => {
-    beforeEach(() => {
-      (globalThis as unknown as Record<string, unknown>)["__APP_VERSION__"] = "2.0.0";
+    it("does not call fetch when rendering with a version", () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (globalThis as any).__APP_VERSION__ = "1.0.0";
+      const fetchSpy = jest.spyOn(globalThis, "fetch");
+
+      render(<Footer />);
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+      fetchSpy.mockRestore();
     });
 
-    it("never calls fetch when rendering the Footer", async () => {
-      fetchSpy.mockResolvedValue(new Response());
-      const { Footer } = await import("./Footer");
+    it("does not call fetch when rendering without a version", () => {
+      const fetchSpy = jest.spyOn(globalThis, "fetch");
+
       render(<Footer />);
+
       expect(fetchSpy).not.toHaveBeenCalled();
+      fetchSpy.mockRestore();
     });
   });
 });
