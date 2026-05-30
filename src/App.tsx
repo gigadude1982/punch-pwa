@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Landing } from "./components/Landing";
+import { JungleBackground } from "./components/JungleBackground";
 import { Game } from "./components/Game";
 import { GameProvider } from "./game/GameProvider";
 import styles from "./App.module.css";
@@ -29,7 +30,10 @@ function App({ enablePlay }: AppProps) {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className={styles.title}>Punch 🦧</h1>
+          <JungleBackground />
+          <h1 className={styles.title}>
+            <span aria-hidden="true">🐒</span> Punch <span aria-hidden="true">🦧</span>
+          </h1>
           <GameProvider>
             <Game />
           </GameProvider>

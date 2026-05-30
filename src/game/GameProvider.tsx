@@ -6,12 +6,14 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { applyDecay, createInitialState, feed as feedPet } from "./engine";
+import { applyDecay, createInitialState, feed as feedPet, recover } from "./engine";
 import { loadState, saveState } from "./storage";
 import type { PetState } from "./types";
 
 /** How often the pet's stats decay while the app is open. */
 const TICK_MS = 5_000;
+/** How long Punch stays sick after vomiting before he bounces back. */
+const SICK_DURATION_MS = 4_000;
 
 interface GameContextValue {
   pet: PetState;
@@ -33,13 +35,25 @@ function now(): number {
 export function GameProvider({ children }: { children: ReactNode }) {
   const [pet, setPet] = useState<PetState>(() => {
     const saved = loadState();
-    return saved ? applyDecay(saved, now()) : createInitialState(now());
+    // sick/overfeed are transient — Punch always wakes up recovered.
+    return saved
+      ? applyDecay({ ...saved, sick: false, overfeed: 0 }, now())
+      : createInitialState(now());
   });
 
   // Persist whenever state changes.
   useEffect(() => {
     saveState(pet);
   }, [pet]);
+
+  // Recover from sickness after a short while.
+  useEffect(() => {
+    if (!pet.sick) {
+      return;
+    }
+    const id = setTimeout(() => setPet((prev) => recover(prev)), SICK_DURATION_MS);
+    return () => clearTimeout(id);
+  }, [pet.sick]);
 
   // Decay the pet over real time while the app is open.
   useEffect(() => {

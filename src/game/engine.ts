@@ -4,6 +4,10 @@ import { STAT_MAX, STAT_MIN, type PetState } from "./types";
 export const FULLNESS_DECAY_PER_MINUTE = 5;
 /** Fullness restored by one feed. */
 export const FEED_AMOUNT = 25;
+/** Feed presses while already full before Punch vomits. */
+export const OVERFEED_LIMIT = 5;
+/** Fullness Punch is left with after throwing up. */
+export const SICK_FULLNESS = 20;
 
 const MS_PER_MINUTE = 60_000;
 
@@ -14,7 +18,7 @@ export function clamp(value: number, min = STAT_MIN, max = STAT_MAX): number {
 
 /** A brand-new, fully-fed pet. */
 export function createInitialState(now: number): PetState {
-  return { fullness: STAT_MAX, lastTick: now };
+  return { fullness: STAT_MAX, lastTick: now, sick: false, overfeed: 0 };
 }
 
 /**
@@ -31,10 +35,32 @@ export function applyDecay(state: PetState, now: number): PetState {
     return { ...state, lastTick: now };
   }
   const fullness = clamp(state.fullness - elapsedMinutes * FULLNESS_DECAY_PER_MINUTE);
-  return { ...state, fullness, lastTick: now };
+  // Once he's no longer stuffed, the over-feed streak resets.
+  const overfeed = fullness < STAT_MAX ? 0 : state.overfeed;
+  return { ...state, fullness, overfeed, lastTick: now };
 }
 
-/** Feed the pet, restoring fullness (clamped at the max). Pure. */
+/**
+ * Feed the pet. Restores fullness up to the max; feeding while already full
+ * builds an over-feed streak, and the OVERFEED_LIMIT-th such press makes Punch
+ * vomit and turn sick (fullness crashes to SICK_FULLNESS). Feeding a sick pet
+ * does nothing. Pure.
+ */
 export function feed(state: PetState): PetState {
-  return { ...state, fullness: clamp(state.fullness + FEED_AMOUNT) };
+  if (state.sick) {
+    return state;
+  }
+  if (state.fullness >= STAT_MAX) {
+    const overfeed = state.overfeed + 1;
+    if (overfeed >= OVERFEED_LIMIT) {
+      return { ...state, fullness: SICK_FULLNESS, sick: true, overfeed: 0 };
+    }
+    return { ...state, fullness: STAT_MAX, overfeed };
+  }
+  return { ...state, fullness: clamp(state.fullness + FEED_AMOUNT), overfeed: 0 };
+}
+
+/** Recover from sickness. Pure. */
+export function recover(state: PetState): PetState {
+  return { ...state, sick: false, overfeed: 0 };
 }

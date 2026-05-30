@@ -28,7 +28,7 @@ beforeEach(() => {
 describe("Game", () => {
   it("renders Punch, a fullness meter, and a feed button", () => {
     renderGame();
-    expect(screen.getByRole("img", { name: /punch the orangutan/i })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /punch the macaque/i })).toBeInTheDocument();
     expect(screen.getByRole("progressbar", { name: /fullness/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /feed/i })).toBeInTheDocument();
   });

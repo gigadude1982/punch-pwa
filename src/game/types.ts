@@ -11,6 +11,10 @@ export interface PetState {
   fullness: number;
   /** Epoch milliseconds when time-based decay was last applied. */
   lastTick: number;
+  /** True after over-feeding: Punch vomited and feels sick (feeding is disabled). */
+  sick: boolean;
+  /** Feed presses landed while already full — at OVERFEED_LIMIT he vomits. */
+  overfeed: number;
 }
 
 export const STAT_MIN = 0;
