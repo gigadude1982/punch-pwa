@@ -1,7 +1,17 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import App from "../App";
+import { Game } from "./Game";
+import { GameProvider } from "../game/GameProvider";
 import { STORAGE_KEY } from "../game/storage";
+
+/** The game shell as App mounts it once Play is pressed — without the landing flow. */
+function renderGame() {
+  return render(
+    <GameProvider>
+      <Game />
+    </GameProvider>,
+  );
+}
 
 function fullnessPct(): number {
   return Number(screen.getByRole("progressbar", { name: /fullness/i }).getAttribute("aria-valuenow"));
@@ -17,7 +27,7 @@ beforeEach(() => {
 
 describe("Game", () => {
   it("renders Punch, a fullness meter, and a feed button", () => {
-    render(<App />);
+    renderGame();
     expect(screen.getByRole("img", { name: /punch the orangutan/i })).toBeInTheDocument();
     expect(screen.getByRole("progressbar", { name: /fullness/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /feed/i })).toBeInTheDocument();
@@ -25,14 +35,14 @@ describe("Game", () => {
 
   it("hydrates the meter from persisted state", () => {
     seed(40);
-    render(<App />);
+    renderGame();
     expect(fullnessPct()).toBe(40);
   });
 
   it("feeding raises fullness", async () => {
     const user = userEvent.setup();
     seed(40);
-    render(<App />);
+    renderGame();
     expect(fullnessPct()).toBe(40);
     await user.click(screen.getByRole("button", { name: /feed/i }));
     expect(fullnessPct()).toBe(65); // 40 + FEED_AMOUNT (25)
@@ -41,12 +51,12 @@ describe("Game", () => {
   it("persists state across a remount", async () => {
     const user = userEvent.setup();
     seed(40);
-    const first = render(<App />);
+    const first = renderGame();
     await user.click(screen.getByRole("button", { name: /feed/i }));
     expect(fullnessPct()).toBe(65);
     first.unmount();
 
-    render(<App />);
+    renderGame();
     expect(fullnessPct()).toBe(65); // restored from localStorage (decay over a few ms ≈ 0)
   });
 });
