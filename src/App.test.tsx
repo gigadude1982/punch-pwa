@@ -39,4 +39,24 @@ describe("App", () => {
       expect(await screen.findByRole("button", { name: /feed/i })).toBeInTheDocument();
     });
   });
+
+  describe("Footer presence", () => {
+    it("mounts the Footer on the landing page (enablePlay=false)", () => {
+      render(<App enablePlay={false} />);
+      expect(screen.getByTestId("footer")).toBeInTheDocument();
+    });
+
+    it("mounts the Footer on the landing page (enablePlay=true)", () => {
+      render(<App enablePlay={true} />);
+      expect(screen.getByTestId("footer")).toBeInTheDocument();
+    });
+
+    it("keeps the Footer visible after navigating into the game", async () => {
+      const user = userEvent.setup();
+      render(<App enablePlay={true} />);
+      await user.click(screen.getByRole("button", { name: /play/i }));
+      await screen.findByRole("button", { name: /feed/i });
+      expect(screen.getByTestId("footer")).toBeInTheDocument();
+    });
+  });
 });
