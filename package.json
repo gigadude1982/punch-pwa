@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:play": "tsc -b && vite build --mode play",
     "preview": "vite preview",
     "lint": "eslint .",
     "test": "jest --watchAll=false",
