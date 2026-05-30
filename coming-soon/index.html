@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Punch &amp; Plushie — Coming Soon</title>
+    <meta name="description" content="Punch &amp; Plushie is coming soon. A cozy, chaotic game where plushies fight back." />
+    <meta name="robots" content="index, follow" />
+    <link rel="icon" href="./punch-and-plushie.png" type="image/png" />
+    <meta property="og:title" content="Punch &amp; Plushie — Coming Soon" />
+    <meta property="og:description" content="Punch &amp; Plushie is coming soon. A cozy, chaotic game where plushies fight back." />
+    <meta property="og:image" content="./punch-and-plushie.png" />
+    <meta property="og:type" content="website" />
+    <style>
+      :root {
+        --bg: #1a1423;
+        --accent: #ff6b9d;
+        --text: #f6f4ff;
+        --muted: #b8b3d0;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        text-align: center;
+        padding: 1.5rem;
+      }
+
+      .container {
+        max-width: 540px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.25rem;
+      }
+
+      .logo {
+        width: 180px;
+        height: auto;
+        image-rendering: pixelated;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 2.25rem;
+        color: var(--accent);
+      }
+
+      p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.6;
+        font-size: 1.1rem;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--accent);
+        border-radius: 999px;
+        color: var(--accent);
+        font-size: 0.9rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <img class="logo" src="./punch-and-plushie.png" alt="Punch and Plushie" />
+      <span class="badge">Coming Soon</span>
+      <h1>Punch &amp; Plushie</h1>
+      <p>
+        A cozy, chaotic game where plushies fight back. We're putting the finishing touches on
+        something special. Check back soon!
+      </p>
+    </main>
+  </body>
+</html>
