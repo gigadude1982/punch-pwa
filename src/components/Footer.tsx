@@ -1,10 +1,10 @@
 import styles from "./Footer.module.css";
 
 /**
- * Renders the app version, injected at build time via Vite's `define` option as
- * the global constant `__APP_VERSION__`. If the version is undefined, null, or
- * empty, no version text is rendered (graceful degradation). This is a static
- * build-time replacement — no network requests are made.
+ * Renders the app version (e.g. "v1.2.3") injected at build time via Vite's
+ * `define` option. Gracefully renders nothing when the version is missing,
+ * undefined, null, or an empty string. No runtime fetching occurs — the value
+ * is a static compile-time replacement.
  */
 export function Footer() {
   const version = typeof __APP_VERSION__ === "string" ? __APP_VERSION__.trim() : "";

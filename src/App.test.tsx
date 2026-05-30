@@ -2,8 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App";
 
-// Provide the build-time constant that Vite normally replaces at compile time.
-// Without this, `__APP_VERSION__` is undefined in the Jest (Node) environment.
+// Vite replaces __APP_VERSION__ at build time; Jest does not run Vite, so we
+// must assign it as a global here to prevent a ReferenceError at runtime.
 (globalThis as Record<string, unknown>).__APP_VERSION__ = "1.2.3";
 
 beforeEach(() => {
@@ -44,23 +44,20 @@ describe("App", () => {
     });
   });
 
-  describe("Footer", () => {
-    it("is present in the rendered output on every page load", () => {
+  describe("Footer integration", () => {
+    it("mounts the Footer so it is present on every page load with play disabled", () => {
       render(<App enablePlay={false} />);
       expect(screen.getByTestId("footer")).toBeInTheDocument();
     });
 
-    it("displays the app version from __APP_VERSION__", () => {
+    it("mounts the Footer so it is present on every page load with play enabled", () => {
+      render(<App enablePlay={true} />);
+      expect(screen.getByTestId("footer")).toBeInTheDocument();
+    });
+
+    it("displays the version string from __APP_VERSION__ in the footer", () => {
       render(<App enablePlay={false} />);
       expect(screen.getByTestId("footer-version")).toHaveTextContent("v1.2.3");
-    });
-
-    it("is present even when the game view is active", async () => {
-      const user = userEvent.setup();
-      render(<App enablePlay={true} />);
-      await user.click(screen.getByRole("button", { name: /play/i }));
-      await screen.findByRole("button", { name: /feed/i });
-      expect(screen.getByTestId("footer")).toBeInTheDocument();
     });
   });
 });

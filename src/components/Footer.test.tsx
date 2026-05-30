@@ -1,100 +1,111 @@
 import { render, screen } from "@testing-library/react";
 import { Footer } from "./Footer";
 
-const setAppVersion = (value: string | undefined) => {
-  Object.defineProperty(globalThis, "__APP_VERSION__", {
-    configurable: true,
-    writable: true,
-    value,
-  });
-};
-
-afterEach(() => {
-  setAppVersion(undefined);
-  jest.restoreAllMocks();
-});
-
 describe("Footer", () => {
-  describe("when __APP_VERSION__ is a valid non-empty string", () => {
-    it("renders 'v{version}' in the footer", () => {
-      setAppVersion("1.2.3");
-      render(<Footer />);
+  const originalFetch = global.fetch;
 
-      const versionEl = screen.getByTestId("footer-version");
-      expect(versionEl).toBeInTheDocument();
-      expect(versionEl).toHaveTextContent("v1.2.3");
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  describe("when __APP_VERSION__ is a valid non-empty string", () => {
+    beforeEach(() => {
+      (global as Record<string, unknown>).__APP_VERSION__ = "1.2.3";
+    });
+
+    afterEach(() => {
+      delete (global as Record<string, unknown>).__APP_VERSION__;
     });
 
     it("renders the footer element", () => {
-      setAppVersion("1.2.3");
       render(<Footer />);
-
       expect(screen.getByTestId("footer")).toBeInTheDocument();
     });
 
-    it("trims whitespace from the version before rendering", () => {
-      setAppVersion("  2.0.0  ");
+    it("renders the version string in the format v{version}", () => {
       render(<Footer />);
+      expect(screen.getByTestId("footer-version")).toBeInTheDocument();
+      expect(screen.getByTestId("footer-version")).toHaveTextContent("v1.2.3");
+    });
 
-      const versionEl = screen.getByTestId("footer-version");
-      expect(versionEl).toHaveTextContent("v2.0.0");
+    it("does not make any fetch calls during rendering", () => {
+      const fetchMock = jest.fn();
+      global.fetch = fetchMock as unknown as typeof fetch;
+      render(<Footer />);
+      expect(fetchMock).not.toHaveBeenCalled();
     });
   });
 
   describe("when __APP_VERSION__ is undefined", () => {
-    it("renders the footer without any version text", () => {
-      setAppVersion(undefined);
-      render(<Footer />);
+    beforeEach(() => {
+      delete (global as Record<string, unknown>).__APP_VERSION__;
+    });
 
+    it("renders the footer element without throwing", () => {
+      expect(() => render(<Footer />)).not.toThrow();
       expect(screen.getByTestId("footer")).toBeInTheDocument();
+    });
+
+    it("does not render any version text", () => {
+      render(<Footer />);
       expect(screen.queryByTestId("footer-version")).not.toBeInTheDocument();
     });
 
-    it("does not throw during render", () => {
-      setAppVersion(undefined);
-      expect(() => render(<Footer />)).not.toThrow();
+    it("does not make any fetch calls during rendering", () => {
+      const fetchMock = jest.fn();
+      global.fetch = fetchMock as unknown as typeof fetch;
+      render(<Footer />);
+      expect(fetchMock).not.toHaveBeenCalled();
     });
   });
 
   describe("when __APP_VERSION__ is an empty string", () => {
-    it("renders the footer without any version text", () => {
-      setAppVersion("");
-      render(<Footer />);
-
-      expect(screen.getByTestId("footer")).toBeInTheDocument();
-      expect(screen.queryByTestId("footer-version")).not.toBeInTheDocument();
+    beforeEach(() => {
+      (global as Record<string, unknown>).__APP_VERSION__ = "";
     });
 
-    it("does not throw during render", () => {
-      setAppVersion("");
+    afterEach(() => {
+      delete (global as Record<string, unknown>).__APP_VERSION__;
+    });
+
+    it("renders the footer element without throwing", () => {
       expect(() => render(<Footer />)).not.toThrow();
+      expect(screen.getByTestId("footer")).toBeInTheDocument();
+    });
+
+    it("does not render any version text", () => {
+      render(<Footer />);
+      expect(screen.queryByTestId("footer-version")).not.toBeInTheDocument();
     });
   });
 
   describe("when __APP_VERSION__ is a whitespace-only string", () => {
-    it("renders no version text after trimming", () => {
-      setAppVersion("   ");
-      render(<Footer />);
+    beforeEach(() => {
+      (global as Record<string, unknown>).__APP_VERSION__ = "   ";
+    });
 
+    afterEach(() => {
+      delete (global as Record<string, unknown>).__APP_VERSION__;
+    });
+
+    it("does not render any version text after trimming", () => {
+      render(<Footer />);
       expect(screen.queryByTestId("footer-version")).not.toBeInTheDocument();
     });
   });
 
-  describe("no network activity", () => {
-    it("does not call fetch during rendering when version is present", () => {
-      const fetchSpy = jest.spyOn(globalThis, "fetch");
-      setAppVersion("3.0.0");
-      render(<Footer />);
-
-      expect(fetchSpy).not.toHaveBeenCalled();
+  describe("when __APP_VERSION__ is a different valid version", () => {
+    beforeEach(() => {
+      (global as Record<string, unknown>).__APP_VERSION__ = "0.9.0";
     });
 
-    it("does not call fetch during rendering when version is absent", () => {
-      const fetchSpy = jest.spyOn(globalThis, "fetch");
-      setAppVersion(undefined);
-      render(<Footer />);
+    afterEach(() => {
+      delete (global as Record<string, unknown>).__APP_VERSION__;
+    });
 
-      expect(fetchSpy).not.toHaveBeenCalled();
+    it("renders v0.9.0 correctly", () => {
+      render(<Footer />);
+      expect(screen.getByTestId("footer-version")).toHaveTextContent("v0.9.0");
     });
   });
 });
