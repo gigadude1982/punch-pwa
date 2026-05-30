@@ -6,10 +6,14 @@ interface ImportMetaEnv {
   readonly VITE_ENABLE_PLAY?: string;
 }
 
+/**
+ * App version injected at build time from package.json via Vite's `define`.
+ * Replaced literally at build time — no runtime fetch. May be an empty string
+ * if the version field is absent.
+ */
+declare const __APP_VERSION__: string;
+
 declare module "*.module.css" {
   const classes: { readonly [key: string]: string };
   export default classes;
 }
-
-/** App version injected at build time from package.json via Vite's `define`. */
-declare const __APP_VERSION__: string;
