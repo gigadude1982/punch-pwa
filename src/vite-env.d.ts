@@ -11,5 +11,9 @@ declare module "*.module.css" {
   export default classes;
 }
 
-/** App version injected at build time from package.json via Vite's `define`. */
+/**
+ * App version injected at build time from package.json via Vite's `define`
+ * option. Statically replaced in the bundle — no runtime fetch. May be an empty
+ * string if the version field is absent.
+ */
 declare const __APP_VERSION__: string;

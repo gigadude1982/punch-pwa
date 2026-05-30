@@ -2,9 +2,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App";
 
-// Vite's `define` replaces __APP_VERSION__ at build time, but Jest does not run
-// Vite, so we assign the global here to match the ambient declaration in
-// vite-env.d.ts and give it a realistic value for all tests in this file.
+// Provide the build-time constant that Vite normally replaces at compile time.
+// Without this, `__APP_VERSION__` is undefined in the Jest (Node) environment.
 (globalThis as Record<string, unknown>).__APP_VERSION__ = "1.2.3";
 
 beforeEach(() => {
@@ -45,29 +44,23 @@ describe("App", () => {
     });
   });
 
-  describe("Footer presence", () => {
-    it("mounts the Footer on the landing page so the footer element is present", () => {
+  describe("Footer", () => {
+    it("is present in the rendered output on every page load", () => {
       render(<App enablePlay={false} />);
-      expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+      expect(screen.getByTestId("footer")).toBeInTheDocument();
     });
 
-    it("mounts the Footer when play is enabled on the landing page", () => {
-      render(<App enablePlay={true} />);
-      expect(screen.getByRole("contentinfo")).toBeInTheDocument();
-    });
-
-    it("shows the version string in the footer on the landing page", () => {
+    it("displays the app version from __APP_VERSION__", () => {
       render(<App enablePlay={false} />);
-      expect(screen.getByTestId("footer-version")).toBeInTheDocument();
       expect(screen.getByTestId("footer-version")).toHaveTextContent("v1.2.3");
     });
 
-    it("footer with version is still present after navigating to the game view", async () => {
+    it("is present even when the game view is active", async () => {
       const user = userEvent.setup();
       render(<App enablePlay={true} />);
       await user.click(screen.getByRole("button", { name: /play/i }));
       await screen.findByRole("button", { name: /feed/i });
-      expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+      expect(screen.getByTestId("footer")).toBeInTheDocument();
     });
   });
 });

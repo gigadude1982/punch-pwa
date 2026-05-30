@@ -13,8 +13,8 @@ export default defineConfig(({ mode }) => {
 
   return {
     // Inject the app version from package.json as a build-time global constant.
-    // Vite replaces __APP_VERSION__ literally at build time, so there is no
-    // runtime fetch or dynamic import of package.json.
+    // Vite replaces `__APP_VERSION__` literally at build time, so the version is
+    // a static string in the bundle with no runtime fetch or dynamic import.
     define: {
       __APP_VERSION__: JSON.stringify(version),
     },

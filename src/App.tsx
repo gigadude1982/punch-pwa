@@ -17,28 +17,29 @@ function App({ enablePlay }: AppProps) {
   const [view, setView] = useState<View>("landing");
 
   return (
-    <AnimatePresence mode="wait">
-      {view === "landing" ? (
-        <motion.div key="landing" exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
-          <Landing enablePlay={enablePlay} onPlay={() => setView("game")} />
-          <Footer />
-        </motion.div>
-      ) : (
-        <motion.main
-          key="game"
-          className={styles.app}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1 className={styles.title}>Punch 🦧</h1>
-          <GameProvider>
-            <Game />
-          </GameProvider>
-          <Footer />
-        </motion.main>
-      )}
-    </AnimatePresence>
+    <>
+      <AnimatePresence mode="wait">
+        {view === "landing" ? (
+          <motion.div key="landing" exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
+            <Landing enablePlay={enablePlay} onPlay={() => setView("game")} />
+          </motion.div>
+        ) : (
+          <motion.main
+            key="game"
+            className={styles.app}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h1 className={styles.title}>Punch 🦧</h1>
+            <GameProvider>
+              <Game />
+            </GameProvider>
+          </motion.main>
+        )}
+      </AnimatePresence>
+      <Footer />
+    </>
   );
 }
 
