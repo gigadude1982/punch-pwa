@@ -1,5 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { Footer } from "./Footer";
+import pkg from "../../package.json";
+
+declare const __APP_VERSION__: string | undefined;
 
 /**
  * Helper: (re-)define the build-time constant __APP_VERSION__ on globalThis
@@ -41,6 +44,26 @@ describe("Footer", () => {
 
       const versionEl = screen.getByTestId("footer-version");
       expect(versionEl).toHaveTextContent("v0.0.1");
+    });
+
+    it("renders the version matching the version field in package.json", () => {
+      setAppVersion(pkg.version);
+
+      render(<Footer />);
+
+      const versionEl = screen.getByTestId("footer-version");
+      expect(versionEl).toHaveTextContent(`v${pkg.version}`);
+    });
+
+    it("renders v1.0.2 when the build-time version is the current package version", () => {
+      expect(pkg.version).toBe("1.0.2");
+
+      setAppVersion(pkg.version);
+
+      render(<Footer />);
+
+      const versionEl = screen.getByTestId("footer-version");
+      expect(versionEl).toHaveTextContent("v1.0.2");
     });
 
     it("does not render the version element when __APP_VERSION__ is undefined", () => {
@@ -88,7 +111,7 @@ describe("Footer", () => {
     });
   });
 
-  describe("build-time constant — no runtime fetching", () => {
+  describe("build-time constant - no runtime fetching", () => {
     it("does not call fetch when rendering with a version present", () => {
       const fetchSpy = jest.fn();
       globalThis.fetch = fetchSpy as unknown as typeof globalThis.fetch;
