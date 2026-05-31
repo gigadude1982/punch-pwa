@@ -9,7 +9,7 @@ import {
   feed,
   recover,
 } from "./engine";
-import type { PetState } from "./types";
+import { STAT_MAX, type PetState } from "./types";
 
 /** A healthy pet at the given fullness, for terse test setup. */
 function pet(overrides: Partial<PetState> = {}): PetState {
@@ -51,9 +51,18 @@ describe("applyDecay", () => {
     expect(applyDecay(state, 0).fullness).toBe(50); // negative elapsed floored at 0
   });
 
-  it("clears the over-feed streak once he's no longer full", () => {
+  it("keeps the over-feed streak while he's still too full for a full portion", () => {
+    // One minute of decay (100 → 95) still leaves no room for a full feed, so
+    // the streak must survive — otherwise the decay applied before every feed
+    // would reset it and over-feeding could never trigger.
     const decayed = applyDecay(pet({ fullness: 100, overfeed: 3 }), 60_000);
-    expect(decayed.fullness).toBeLessThan(100);
+    expect(decayed.fullness).toBeGreaterThan(STAT_MAX - FEED_AMOUNT);
+    expect(decayed.overfeed).toBe(3);
+  });
+
+  it("clears the over-feed streak once he has room for a full portion again", () => {
+    const decayed = applyDecay(pet({ fullness: 100, overfeed: 3 }), 6 * 60_000); // → 70
+    expect(decayed.fullness).toBeLessThanOrEqual(STAT_MAX - FEED_AMOUNT);
     expect(decayed.overfeed).toBe(0);
   });
 });
@@ -88,6 +97,20 @@ describe("feed", () => {
   it("ignores feeding while sick", () => {
     const sick = pet({ fullness: SICK_FULLNESS, sick: true });
     expect(feed(sick)).toBe(sick);
+  });
+
+  it("still makes him sick when mashed in the live loop (decay before each press)", () => {
+    // Reproduces the reported bug: the UI applies decay before every feed, so a
+    // sliver of fullness is always lost first. The over-feed streak must survive
+    // that for repeated presses to ever trigger sickness.
+    let state = pet({ fullness: STAT_MAX, lastTick: 0 });
+    let t = 0;
+    for (let i = 0; i < OVERFEED_LIMIT; i++) {
+      t += 5_000; // ~5s between presses, matching the game's decay cadence
+      state = feed(applyDecay(state, t));
+    }
+    expect(state.sick).toBe(true);
+    expect(state.fullness).toBe(SICK_FULLNESS);
   });
 });
 

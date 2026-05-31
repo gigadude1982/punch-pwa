@@ -35,8 +35,11 @@ export function applyDecay(state: PetState, now: number): PetState {
     return { ...state, lastTick: now };
   }
   const fullness = clamp(state.fullness - elapsedMinutes * FULLNESS_DECAY_PER_MINUTE);
-  // Once he's no longer stuffed, the over-feed streak resets.
-  const overfeed = fullness < STAT_MAX ? 0 : state.overfeed;
+  // Once he's digested enough to hold a full portion again, the over-feed
+  // streak resets. (Checking `< STAT_MAX` here would clear the streak on the
+  // first sliver of decay — which, since decay runs before every feed, made
+  // over-feeding impossible to ever reach.)
+  const overfeed = fullness + FEED_AMOUNT <= STAT_MAX ? 0 : state.overfeed;
   return { ...state, fullness, overfeed, lastTick: now };
 }
 
@@ -50,7 +53,10 @@ export function feed(state: PetState): PetState {
   if (state.sick) {
     return state;
   }
-  if (state.fullness >= STAT_MAX) {
+  // No room for a full portion → he's being crammed past full. Use overflow
+  // rather than an exact `>= STAT_MAX` check so the streak survives the sliver
+  // of decay applied before each press in the live game loop.
+  if (state.fullness + FEED_AMOUNT > STAT_MAX) {
     const overfeed = state.overfeed + 1;
     if (overfeed >= OVERFEED_LIMIT) {
       return { ...state, fullness: SICK_FULLNESS, sick: true, overfeed: 0 };
