@@ -25,27 +25,6 @@ describe("Footer", () => {
   });
 
   describe("version display", () => {
-    it("renders the current package.json version in 'v{version}' format", () => {
-      setAppVersion(pkg.version);
-
-      render(<Footer />);
-
-      const versionEl = screen.getByTestId("footer-version");
-      expect(versionEl).toBeInTheDocument();
-      expect(versionEl).toHaveTextContent(`v${pkg.version}`);
-    });
-
-    it("reflects the bumped version 1.0.2 from package.json", () => {
-      expect(pkg.version).toBe("1.0.2");
-
-      setAppVersion(pkg.version);
-
-      render(<Footer />);
-
-      const versionEl = screen.getByTestId("footer-version");
-      expect(versionEl).toHaveTextContent("v1.0.2");
-    });
-
     it("renders the version in 'v{version}' format when __APP_VERSION__ is a valid semver string", () => {
       setAppVersion("1.2.3");
 
@@ -63,6 +42,28 @@ describe("Footer", () => {
 
       const versionEl = screen.getByTestId("footer-version");
       expect(versionEl).toHaveTextContent("v0.0.1");
+    });
+
+    it("renders the version dynamically from package.json with a 'v' prefix", () => {
+      setAppVersion(pkg.version);
+
+      render(<Footer />);
+
+      const versionEl = screen.getByTestId("footer-version");
+      expect(versionEl).toHaveTextContent(`v${pkg.version}`);
+    });
+
+    it("has package.json version set to 1.0.2", () => {
+      expect(pkg.version).toBe("1.0.2");
+    });
+
+    it("renders 'v1.0.2' when __APP_VERSION__ is set to the current package version", () => {
+      setAppVersion("1.0.2");
+
+      render(<Footer />);
+
+      const versionEl = screen.getByTestId("footer-version");
+      expect(versionEl).toHaveTextContent("v1.0.2");
     });
 
     it("does not render the version element when __APP_VERSION__ is undefined", () => {
@@ -110,7 +111,7 @@ describe("Footer", () => {
     });
   });
 
-  describe("build-time constant — no runtime fetching", () => {
+  describe("build-time constant - no runtime fetching", () => {
     it("does not call fetch when rendering with a version present", () => {
       const fetchSpy = jest.fn();
       globalThis.fetch = fetchSpy as unknown as typeof globalThis.fetch;
