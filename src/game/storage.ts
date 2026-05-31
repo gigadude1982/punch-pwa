@@ -1,10 +1,16 @@
 import type { PetState } from "./types";
 
+/**
+ * Only the durable stats are persisted. Transient flags (sick, overfeed) are
+ * intentionally not saved — Punch always wakes up recovered.
+ */
+type PersistedPet = Pick<PetState, "fullness" | "lastTick">;
+
 /** localStorage key. Versioned so a future state-shape change can migrate/reset. */
 export const STORAGE_KEY = "punch.pet.v1";
 
 /** Load persisted pet state, or null if absent, unparseable, or malformed. */
-export function loadState(): PetState | null {
+export function loadState(): PersistedPet | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) {
@@ -21,9 +27,12 @@ export function loadState(): PetState | null {
 }
 
 /** Persist pet state. Best-effort — quota/availability errors are swallowed. */
-export function saveState(state: PetState): void {
+export function saveState(state: PersistedPet): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ fullness: state.fullness, lastTick: state.lastTick }),
+    );
   } catch {
     // ignore — persistence is non-critical
   }

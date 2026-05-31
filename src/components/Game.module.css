@@ -31,3 +31,9 @@
 .action:active {
   transform: scale(0.96);
 }
+
+.action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #d9c7a3;
+}

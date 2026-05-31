@@ -5,6 +5,16 @@
   gap: 0.5rem;
 }
 
+/* Punch + his (sometimes-present) plush orangutan sit side by side. */
+.stage {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.25rem;
+  min-height: 7rem;
+}
+
 .sprite {
   font-size: 6rem;
   line-height: 1;
@@ -12,9 +22,31 @@
   user-select: none;
 }
 
+.companion {
+  font-size: 3.4rem;
+  line-height: 1;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.3));
+  user-select: none;
+  align-self: flex-end;
+}
+
+/* Vomit splat that pops under Punch when he over-eats. */
+.vomit {
+  position: absolute;
+  bottom: -0.5rem;
+  font-size: 2.5rem;
+  user-select: none;
+  pointer-events: none;
+}
+
 .mood {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
-  color: #5a3a1a;
+  color: var(--cream, #fff8e7);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
+.pet[data-mood="sick"] .mood {
+  color: #b7f0a8;
 }
