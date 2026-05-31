@@ -39,4 +39,37 @@ describe("App", () => {
       expect(await screen.findByRole("button", { name: /feed/i })).toBeInTheDocument();
     });
   });
+
+  describe("Footer visibility", () => {
+    it("renders the footer on the landing page (enablePlay=false)", () => {
+      render(<App enablePlay={false} />);
+      expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+    });
+
+    it("renders the footer on the landing page (enablePlay=true)", () => {
+      render(<App enablePlay={true} />);
+      expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+    });
+
+    it("renders the footer after navigating to the game view", async () => {
+      const user = userEvent.setup();
+      render(<App enablePlay={true} />);
+      await user.click(screen.getByRole("button", { name: /play/i }));
+      await screen.findByRole("button", { name: /feed/i });
+      expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+    });
+
+    it("footer contains copyright text", () => {
+      render(<App enablePlay={false} />);
+      const footer = screen.getByRole("contentinfo");
+      expect(footer).toHaveTextContent(/2026 Punch Tamagotchi/i);
+    });
+
+    it("footer contains the GigaCorp link", () => {
+      render(<App enablePlay={false} />);
+      expect(
+        screen.getByRole("link", { name: /gigacorp/i }),
+      ).toBeInTheDocument();
+    });
+  });
 });

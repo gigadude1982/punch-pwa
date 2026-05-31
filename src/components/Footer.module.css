@@ -26,6 +26,12 @@
   color: #fff;
 }
 
+.version {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  opacity: 0.75;
+}
+
 @media (max-width: 640px) {
   .footer {
     flex-direction: column;

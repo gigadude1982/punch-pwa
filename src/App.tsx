@@ -22,6 +22,7 @@ function App({ enablePlay }: AppProps) {
       {view === "landing" ? (
         <motion.div key="landing" exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
           <Landing enablePlay={enablePlay} onPlay={() => setView("game")} />
+          <Footer />
         </motion.div>
       ) : (
         <motion.main

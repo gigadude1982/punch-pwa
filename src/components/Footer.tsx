@@ -1,6 +1,9 @@
 import styles from "./Footer.module.css";
 
-/** Shared site footer: copyright + GigaCorp credit. */
+/** Build-time version string injected via Vite's `define` (see vite.config.ts). */
+const version = typeof __APP_VERSION__ === "string" ? __APP_VERSION__ : undefined;
+
+/** Shared site footer: copyright + GigaCorp credit + build version. */
 export function Footer() {
   return (
     <footer className={styles.footer}>
@@ -12,6 +15,11 @@ export function Footer() {
         </a>{" "}
         production
       </span>
+      {version ? (
+        <span className={styles.version} data-testid="footer-version">
+          v{version}
+        </span>
+      ) : null}
     </footer>
   );
 }
