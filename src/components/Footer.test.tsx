@@ -2,8 +2,18 @@ import { render, screen } from "@testing-library/react";
 import { Footer } from "./Footer";
 import pkg from "../../package.json";
 
+// Declare the Vite build-time global so TypeScript is satisfied.
 declare const __APP_VERSION__: string | undefined;
 
+/**
+ * Helper: (re-)define the build-time constant __APP_VERSION__ on globalThis
+ * for the duration of a test. Jest runs in jsdom where Vite's `define` plugin
+ * never executes, so we inject the value ourselves.
+ *
+ * Object.defineProperty is used so we can set `undefined` as well as a string,
+ * and so repeated calls in the same test file do not throw about redefining a
+ * non-configurable property.
+ */
 function setAppVersion(value: string | undefined): void {
   Object.defineProperty(globalThis, "__APP_VERSION__", {
     value,
@@ -37,26 +47,28 @@ describe("Footer", () => {
       expect(versionEl).toHaveTextContent("v0.0.1");
     });
 
-    it("renders the version from package.json with a 'v' prefix", () => {
+    it("renders the version sourced from package.json with the 'v' prefix", () => {
       setAppVersion(pkg.version);
 
       render(<Footer />);
 
       const versionEl = screen.getByTestId("footer-version");
+      expect(versionEl).toBeInTheDocument();
       expect(versionEl).toHaveTextContent(`v${pkg.version}`);
     });
 
-    it("reads version 1.0.2 from package.json", () => {
-      expect(pkg.version).toBe("1.0.2");
-    });
-
-    it("renders 'v1.0.2' in the footer when __APP_VERSION__ is set to 1.0.2", () => {
+    it("renders 'v1.0.2' specifically — matching the required version bump", () => {
       setAppVersion("1.0.2");
 
       render(<Footer />);
 
       const versionEl = screen.getByTestId("footer-version");
+      expect(versionEl).toBeInTheDocument();
       expect(versionEl).toHaveTextContent("v1.0.2");
+    });
+
+    it("package.json version field is exactly '1.0.2'", () => {
+      expect(pkg.version).toBe("1.0.2");
     });
 
     it("does not render the version element when __APP_VERSION__ is undefined", () => {
