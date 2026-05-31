@@ -4,13 +4,21 @@ import { Pet } from "./Pet";
 import { StatMeter } from "./StatMeter";
 import styles from "./Game.module.css";
 
+interface GameProps {
+  /** Leave the game and return to the landing page. */
+  onExit: () => void;
+}
+
 /** The game shell: the pet, its stat meters, and the action buttons. */
-export function Game() {
+export function Game({ onExit }: GameProps) {
   const { pet, feed, spinCount } = useGame();
   const bananas = Math.floor(pet.bananas);
   const outOfBananas = bananas < 1;
   return (
     <section className={styles.game}>
+      <button type="button" className={styles.exit} onClick={onExit}>
+        ← Back
+      </button>
       <Pet fullness={pet.fullness} sick={pet.sick} spinCount={spinCount} />
       <StatMeter label="Fullness 🍌" value={pet.fullness} />
       <StatMeter label="Happiness 😊" value={pet.happiness} />

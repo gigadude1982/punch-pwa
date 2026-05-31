@@ -40,7 +40,7 @@ function App({ enablePlay }: AppProps) {
               <span aria-hidden="true">🐒</span> Punch <span aria-hidden="true">🦧</span>
             </h1>
             <GameProvider>
-              <Game />
+              <Game onExit={() => setView("landing")} />
             </GameProvider>
           </div>
           <Footer />
