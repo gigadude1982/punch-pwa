@@ -46,48 +46,49 @@ const SKYLINE: ReadonlyArray<[string, string]> = [
 ];
 
 /**
- * A flowing river that sits beneath Punch's rock. Rendered behind the rock via
- * a low z-index in the CSS module and positioned within the jungle floor band.
- * The water motion is driven by framer-motion (looping translateX on layered
- * wave paths) and respects prefers-reduced-motion for accessibility.
+ * A flowing jungle river that sits low on the scene, beneath Punch's rock.
+ * The wave bands gently translate to convey moving water; the motion is
+ * disabled when the user prefers reduced motion. Rendered with a lower
+ * z-index than the rock so it always reads as being behind it.
  */
 function River() {
-  const reduceMotion = useReducedMotion();
-
-  const drift = reduceMotion ? undefined : { x: [0, -40, 0] };
-  const driftSlow = reduceMotion ? undefined : { x: [0, 36, 0] };
+  const reduce = useReducedMotion();
+  const flow = reduce
+    ? {}
+    : {
+        animate: { x: ["0%", "-50%"] },
+        transition: { duration: 14, ease: "linear", repeat: Infinity },
+      };
+  const flowSlow = reduce
+    ? {}
+    : {
+        animate: { x: ["-50%", "0%"] },
+        transition: { duration: 20, ease: "linear", repeat: Infinity },
+      };
 
   return (
-    <div className={styles.river} data-testid="river">
+    <div className={styles.river} data-testid="jungle-river">
       <svg
         className={styles.riverSvg}
-        viewBox="0 0 400 80"
+        viewBox="0 0 100 24"
         preserveAspectRatio="none"
-        role="presentation"
+        aria-hidden="true"
       >
-        <defs>
-          <linearGradient id="riverGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#3fb0d8" />
-            <stop offset="100%" stopColor="#1c6f99" />
-          </linearGradient>
-        </defs>
-        <rect x="0" y="0" width="400" height="80" fill="url(#riverGradient)" />
-        <motion.path
-          d="M-40 30 Q 20 18 80 30 T 200 30 T 320 30 T 440 30 V 80 H -40 Z"
-          fill="rgba(255,255,255,0.16)"
-          animate={drift}
-          transition={
-            reduceMotion ? undefined : { duration: 6, repeat: Infinity, ease: "easeInOut" }
-          }
-        />
-        <motion.path
-          d="M-40 48 Q 30 38 90 48 T 220 48 T 350 48 T 480 48 V 80 H -40 Z"
-          fill="rgba(255,255,255,0.1)"
-          animate={driftSlow}
-          transition={
-            reduceMotion ? undefined : { duration: 9, repeat: Infinity, ease: "easeInOut" }
-          }
-        />
+        <rect x="0" y="0" width="100" height="24" fill="var(--river-deep)" />
+        <motion.g {...flowSlow}>
+          <path
+            d="M0 9 C 12 4, 24 14, 36 9 C 48 4, 60 14, 72 9 C 84 4, 96 14, 108 9 C 120 4, 132 14, 144 9 C 156 4, 168 14, 180 9 L 200 9 L 200 24 L 0 24 Z"
+            fill="var(--river)"
+            opacity="0.85"
+          />
+        </motion.g>
+        <motion.g {...flow}>
+          <path
+            d="M0 13 C 10 9, 20 17, 30 13 C 40 9, 50 17, 60 13 C 70 9, 80 17, 90 13 C 100 9, 110 17, 120 13 C 130 9, 140 17, 150 13 C 160 9, 170 17, 180 13 L 200 13 L 200 24 L 0 24 Z"
+            fill="var(--river-foam)"
+            opacity="0.5"
+          />
+        </motion.g>
       </svg>
     </div>
   );
@@ -95,9 +96,9 @@ function River() {
 
 /**
  * The shared jungle scene — gradient sky, faint trees, swaying canopy vines,
- * drifting bananas, a flowing river beneath Punch's rock, and a forest floor of
- * palms. Purely decorative and non-interactive; render page content above it.
- * Used by both the landing page and the game.
+ * drifting bananas, a flowing river, and a forest floor of palms. Purely
+ * decorative and non-interactive; render page content above it. Used by both
+ * the landing page and the game.
  */
 export function JungleBackground() {
   return (
