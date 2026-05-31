@@ -1,29 +1,31 @@
-/* River that sits beneath Punch's rock and renders behind it. */
+/* River that sits within the jungle floor, beneath Punch's rock. */
 .river {
-  --water: #3aa0d8;
-  --water-deep: #1b6fa8;
-  --water-foam: #cdeefb;
+  --river-light: #5bc8e6;
+  --river-mid: #2f9fd1;
+  --river-deep: #15648f;
+  --river-foam: #d7f4ff;
 
   position: absolute;
-  left: 50%;
-  bottom: 96px;
+  left: 0;
+  right: 0;
+  bottom: 28px;
+  width: 100%;
+  height: clamp(60px, 12vh, 130px);
+  /* Render behind the rock; the backdrop establishes the z-index: 0 context. */
   z-index: 1;
-  width: clamp(220px, 38vw, 560px);
-  height: clamp(70px, 9vw, 130px);
-  transform: translateX(-50%);
   pointer-events: none;
+  overflow: hidden;
 }
 
 .svg {
   display: block;
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.3));
 }
 
 @media (max-width: 640px) {
   .river {
-    bottom: 84px;
-    width: clamp(180px, 60vw, 360px);
+    bottom: 20px;
+    height: clamp(48px, 14vh, 90px);
   }
 }

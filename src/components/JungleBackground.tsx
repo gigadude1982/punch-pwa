@@ -1,4 +1,5 @@
 import { motion, useReducedMotion } from "framer-motion";
+
 import styles from "./JungleBackground.module.css";
 
 /** Decorative vines hanging from the canopy: [leftPct, heightPx, delaySec]. */
@@ -46,50 +47,40 @@ const SKYLINE: ReadonlyArray<[string, string]> = [
 ];
 
 /**
- * A flowing jungle river that sits low on the scene, beneath Punch's rock.
- * The wave bands gently translate to convey moving water; the motion is
- * disabled when the user prefers reduced motion. Rendered with a lower
- * z-index than the rock so it always reads as being behind it.
+ * A flowing river that sits behind Punch's rock. Rendered as a wide,
+ * full-width SVG band of stacked wavy stripes; framer-motion shifts the
+ * stripes horizontally to convey gently moving water. Honors
+ * prefers-reduced-motion by holding still. Colors are drawn from the
+ * jungle palette (CSS variables on .backdrop) for visual consistency.
  */
 function River() {
-  const reduce = useReducedMotion();
-  const flow = reduce
-    ? {}
-    : {
-        animate: { x: ["0%", "-50%"] },
-        transition: { duration: 14, ease: "linear", repeat: Infinity },
-      };
-  const flowSlow = reduce
-    ? {}
-    : {
-        animate: { x: ["-50%", "0%"] },
-        transition: { duration: 20, ease: "linear", repeat: Infinity },
-      };
+  const reduceMotion = useReducedMotion();
 
   return (
-    <div className={styles.river} data-testid="jungle-river">
-      <svg
+    <div className={styles.river} data-testid="jungle-river" aria-hidden="true">
+      <motion.svg
         className={styles.riverSvg}
-        viewBox="0 0 100 24"
+        viewBox="0 0 1200 200"
         preserveAspectRatio="none"
-        aria-hidden="true"
+        animate={reduceMotion ? undefined : { x: [0, -120, 0] }}
+        transition={
+          reduceMotion ? undefined : { duration: 9, ease: "easeInOut", repeat: Infinity }
+        }
       >
-        <rect x="0" y="0" width="100" height="24" fill="var(--river-deep)" />
-        <motion.g {...flowSlow}>
-          <path
-            d="M0 9 C 12 4, 24 14, 36 9 C 48 4, 60 14, 72 9 C 84 4, 96 14, 108 9 C 120 4, 132 14, 144 9 C 156 4, 168 14, 180 9 L 200 9 L 200 24 L 0 24 Z"
-            fill="var(--river)"
-            opacity="0.85"
-          />
-        </motion.g>
-        <motion.g {...flow}>
-          <path
-            d="M0 13 C 10 9, 20 17, 30 13 C 40 9, 50 17, 60 13 C 70 9, 80 17, 90 13 C 100 9, 110 17, 120 13 C 130 9, 140 17, 150 13 C 160 9, 170 17, 180 13 L 200 13 L 200 24 L 0 24 Z"
-            fill="var(--river-foam)"
-            opacity="0.5"
-          />
-        </motion.g>
-      </svg>
+        <rect x="-200" y="0" width="1600" height="200" className={styles.riverBase} />
+        <path
+          className={styles.riverWave1}
+          d="M-200 60 Q 100 40 400 60 T 1000 60 T 1600 60 V 200 H -200 Z"
+        />
+        <path
+          className={styles.riverWave2}
+          d="M-200 110 Q 150 90 450 110 T 1050 110 T 1600 110 V 200 H -200 Z"
+        />
+        <path
+          className={styles.riverWave3}
+          d="M-200 150 Q 200 135 500 150 T 1100 150 T 1600 150 V 200 H -200 Z"
+        />
+      </motion.svg>
     </div>
   );
 }
@@ -97,8 +88,8 @@ function River() {
 /**
  * The shared jungle scene — gradient sky, faint trees, swaying canopy vines,
  * drifting bananas, a flowing river, and a forest floor of palms. Purely
- * decorative and non-interactive; render page content above it. Used by both
- * the landing page and the game.
+ * decorative and non-interactive; render page content (including Punch's rock)
+ * above it. Used by both the landing page and the game.
  */
 export function JungleBackground() {
   return (

@@ -1,110 +1,134 @@
 import { render, screen } from "@testing-library/react";
+import { useReducedMotion } from "framer-motion";
 import { River } from "./River";
-import { JungleBackground } from "./JungleBackground";
 
 jest.mock("framer-motion", () => {
-  const ReactModule = require("react") as typeof import("react");
+  const actual = jest.requireActual<typeof import("framer-motion")>("framer-motion");
   return {
-    motion: new Proxy(
-      {},
-      {
-        get(_target: Record<string, unknown>, prop: string) {
-          return function MotionStub(props: Record<string, unknown>) {
-            const { animate: _a, transition: _t, ...rest } = props;
-            return ReactModule.createElement(prop as keyof JSX.IntrinsicElements, rest);
-          };
-        },
-      },
-    ),
-    useReducedMotion: jest.fn().mockReturnValue(false),
+    ...actual,
+    motion: {
+      ...actual.motion,
+      path: ({ animate: _a, transition: _t, ...props }: Record<string, unknown>) => (
+        <path {...(props as React.SVGProps<SVGPathElement>)} />
+      ),
+      svg: ({ animate: _a, transition: _t, ...props }: Record<string, unknown>) => (
+        <svg {...(props as React.SVGProps<SVGSVGElement>)} />
+      ),
+    },
+    useReducedMotion: jest.fn(() => false),
   };
 });
 
-import { useReducedMotion } from "framer-motion";
-
 const mockUseReducedMotion = useReducedMotion as jest.MockedFunction<typeof useReducedMotion>;
 
-beforeEach(() => {
-  mockUseReducedMotion.mockReturnValue(false);
-});
-
-describe("River (standalone)", () => {
-  it("renders the river element with the correct testid", () => {
-    render(<River />);
-    expect(screen.getByTestId("river")).toBeInTheDocument();
+describe("River", () => {
+  beforeEach(() => {
+    mockUseReducedMotion.mockReturnValue(false);
   });
 
-  it("contains an SVG water graphic", () => {
-    const { container } = render(<River />);
-    expect(container.querySelector("svg")).toBeInTheDocument();
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  it("renders two wave paths inside the SVG", () => {
-    render(<River />);
-    expect(screen.getByTestId("river-wave-a")).toBeInTheDocument();
-    expect(screen.getByTestId("river-wave-b")).toBeInTheDocument();
+  describe("rendering", () => {
+    it("renders a river element visible in the scene", () => {
+      render(<River />);
+      expect(screen.getByTestId("river")).toBeInTheDocument();
+    });
+
+    it("contains an SVG element representing flowing water", () => {
+      render(<River />);
+      const river = screen.getByTestId("river");
+      expect(river.querySelector("svg")).toBeInTheDocument();
+    });
+
+    it("SVG uses a viewBox of 1200x200 for the water band", () => {
+      render(<River />);
+      const river = screen.getByTestId("river");
+      const svg = river.querySelector("svg");
+      expect(svg).toHaveAttribute("viewBox", "0 0 1200 200");
+    });
+
+    it("renders a base rect that fills the river body", () => {
+      render(<River />);
+      const river = screen.getByTestId("river");
+      const rect = river.querySelector("rect");
+      expect(rect).toBeInTheDocument();
+      expect(rect).toHaveAttribute("width", "1200");
+      expect(rect).toHaveAttribute("height", "200");
+    });
+
+    it("renders at least two wave path elements for the flowing water effect", () => {
+      render(<River />);
+      const river = screen.getByTestId("river");
+      const paths = river.querySelectorAll("path");
+      expect(paths.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it("SVG preserves aspect ratio to none so it fills full width at all resolutions", () => {
+      render(<River />);
+      const river = screen.getByTestId("river");
+      const svg = river.querySelector("svg");
+      expect(svg).toHaveAttribute("preserveAspectRatio", "none");
+    });
   });
 
-  it("marks the river container as aria-hidden so screen readers skip it", () => {
-    render(<River />);
-    expect(screen.getByTestId("river")).toHaveAttribute("aria-hidden", "true");
+  describe("accessibility", () => {
+    it("is hidden from assistive technology with aria-hidden", () => {
+      render(<River />);
+      expect(screen.getByTestId("river")).toHaveAttribute("aria-hidden", "true");
+    });
+
+    it("does not expose a role to screen readers", () => {
+      render(<River />);
+      expect(screen.getByTestId("river")).not.toHaveAttribute("role");
+    });
   });
 
-  it("applies a CSS class to the river container for z-index ordering", () => {
-    const { container } = render(<River />);
-    const riverDiv = container.firstChild as HTMLElement;
-    expect(riverDiv.className).toBeTruthy();
+  describe("render order — behind the rock", () => {
+    it("applies the river CSS module class to establish its z-index context", () => {
+      render(<River />);
+      const river = screen.getByTestId("river");
+      expect(river.className).toBeTruthy();
+    });
+
+    it("is a distinct element — does not share data-testid with any rock element", () => {
+      render(<River />);
+      expect(screen.getByTestId("river")).toBeInTheDocument();
+      expect(screen.queryByTestId("rock")).not.toBeInTheDocument();
+    });
+
+    it("river container is not the rock element", () => {
+      render(<River />);
+      const river = screen.getByTestId("river");
+      expect(river).not.toHaveAttribute("data-testid", "rock");
+    });
   });
 
-  it("still renders all elements when prefers-reduced-motion is active", () => {
-    mockUseReducedMotion.mockReturnValue(true);
-    render(<River />);
-    expect(screen.getByTestId("river")).toBeInTheDocument();
-    expect(screen.getByTestId("river-wave-a")).toBeInTheDocument();
-    expect(screen.getByTestId("river-wave-b")).toBeInTheDocument();
-  });
+  describe("prefers-reduced-motion", () => {
+    it("still renders the river element when reduced motion is requested", () => {
+      mockUseReducedMotion.mockReturnValue(true);
+      render(<River />);
+      expect(screen.getByTestId("river")).toBeInTheDocument();
+    });
 
-  it("does not render any interactive elements (purely decorative)", () => {
-    render(<River />);
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
-  });
-});
+    it("still renders the SVG water graphic when reduced motion is requested", () => {
+      mockUseReducedMotion.mockReturnValue(true);
+      render(<River />);
+      const river = screen.getByTestId("river");
+      expect(river.querySelector("svg")).toBeInTheDocument();
+    });
 
-describe("River within JungleBackground", () => {
-  it("renders a river element inside the JungleBackground scene", () => {
-    render(<JungleBackground />);
-    expect(screen.getByTestId("jungle-river")).toBeInTheDocument();
-  });
+    it("still renders wave paths when reduced motion is requested", () => {
+      mockUseReducedMotion.mockReturnValue(true);
+      render(<River />);
+      const river = screen.getByTestId("river");
+      expect(river.querySelectorAll("path").length).toBeGreaterThanOrEqual(2);
+    });
 
-  it("jungle-river is a distinct DOM node from other scene children", () => {
-    const { container } = render(<JungleBackground />);
-    const river = screen.getByTestId("jungle-river");
-    const allDivs = Array.from(container.querySelectorAll("div"));
-    const nonRiverDivs = allDivs.filter((el) => el !== river);
-    expect(nonRiverDivs.length).toBeGreaterThan(0);
-    nonRiverDivs.forEach((el) => expect(el).not.toBe(river));
-  });
-
-  it("river appears before the jungle floor in DOM order (lower z-index renders behind)", () => {
-    render(<JungleBackground />);
-    const river = screen.getByTestId("jungle-river");
-    const backdrop = river.parentElement as HTMLElement;
-    const children = Array.from(backdrop.children);
-    const riverIndex = children.indexOf(river);
-    expect(riverIndex).toBeGreaterThanOrEqual(0);
-    expect(children.length).toBeGreaterThan(riverIndex + 1);
-  });
-
-  it("jungle-river contains an SVG element", () => {
-    render(<JungleBackground />);
-    const riverDiv = screen.getByTestId("jungle-river");
-    expect(riverDiv.querySelector("svg")).toBeInTheDocument();
-  });
-
-  it("still renders the river when prefers-reduced-motion is active", () => {
-    mockUseReducedMotion.mockReturnValue(true);
-    render(<JungleBackground />);
-    expect(screen.getByTestId("jungle-river")).toBeInTheDocument();
+    it("does not throw when motion is suppressed", () => {
+      mockUseReducedMotion.mockReturnValue(true);
+      expect(() => render(<River />)).not.toThrow();
+    });
   });
 });

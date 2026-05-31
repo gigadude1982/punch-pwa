@@ -6,9 +6,9 @@
   --bark: #7a4f2a;
   --earth: #4a3018;
   --earth-deep: #2a1a0c;
-  --river: #2f7fc4;
-  --river-deep: #1b4f7e;
-  --river-foam: #bfe4ff;
+  --river: #3aa0d6;
+  --river-deep: #1f6fa6;
+  --river-foam: #cdeffb;
 
   position: fixed;
   inset: 0;
@@ -106,16 +106,16 @@
   background: linear-gradient(to bottom, #08331a 0%, rgba(15, 82, 38, 0.55) 45%, transparent 100%);
 }
 
-/* river — sits behind the jungle floor / rock, scales across resolutions */
+/* the river — flows behind the rock, above the jungle floor */
 .river {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 90px;
-  height: clamp(60px, 9vh, 110px);
+  bottom: 96px;
+  height: clamp(70px, 14vh, 150px);
   z-index: 1;
   overflow: hidden;
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.25));
+  filter: drop-shadow(0 -2px 6px rgba(0, 0, 0, 0.25));
 }
 .riverSvg {
   display: block;
@@ -123,7 +123,7 @@
   height: 100%;
 }
 
-/* jungle floor */
+/* jungle floor sits above the river so the river appears to emerge behind it */
 .jungleFloor {
   position: absolute;
   left: 0;
