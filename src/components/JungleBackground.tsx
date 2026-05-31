@@ -1,3 +1,4 @@
+import { River } from "./River";
 import styles from "./JungleBackground.module.css";
 
 /** Decorative vines hanging from the canopy: [leftPct, heightPx, delaySec]. */
@@ -46,9 +47,12 @@ const SKYLINE: ReadonlyArray<[string, string]> = [
 
 /**
  * The shared jungle scene — gradient sky, faint trees, swaying canopy vines,
- * drifting bananas, and a forest floor of palms. Purely decorative and
- * non-interactive; render page content above it. Used by both the landing page
- * and the game.
+ * drifting bananas, an animated river, and a forest floor of palms. Purely
+ * decorative and non-interactive; render page content (including Punch's rock)
+ * above it. Used by both the landing page and the game.
+ *
+ * The {@link River} is rendered before the jungle floor so it sits behind the
+ * floor and any rock placed above the backdrop.
  */
 export function JungleBackground() {
   return (
@@ -90,6 +94,8 @@ export function JungleBackground() {
           </span>
         ))}
       </div>
+
+      <River />
 
       <div className={styles.jungleFloor}>
         <div className={styles.skyline}>
