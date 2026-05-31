@@ -3,17 +3,22 @@ name: Deploy punch-pwa to S3
 permissions:
   contents: read
 
-# Deploys the Play build (landing → Play → game) to the dev bucket
-# (dev.punchtamagotchi.com) on every push to main. Production
-# (www.punchtamagotchi.com) serves the default build (Coming Soon landing, no
-# game) and is deployed MANUALLY — it is NOT touched by this workflow. Target
-# bucket and distribution are driven by repo secrets, mirroring gigacorp-react's
-# deploy.
+# Branch → GitHub Environment → site:
+#   dev  branch → "dev"  environment → dev.punchtamagotchi.com  (play build: the game)
+#   main branch → "prod" environment → www.punchtamagotchi.com  (default build: Coming Soon)
+#
+# Normal flow: feature branches PR into `dev` (auto-deploys dev); when ready,
+# `dev` PRs into `main` (auto-deploys prod). The target bucket + CloudFront
+# distribution come from per-environment variables
+# (vars.AWS_S3_BUCKET / vars.AWS_CLOUDFRONT_DISTRIBUTION_ID); AWS credentials
+# are shared repo secrets. Add a required reviewer on the `prod` environment to
+# gate production deploys behind a manual approval.
 
 on:
   push:
     branches:
       - main
+      - dev
 
 concurrency:
   group: deploy-${{ github.ref }}
@@ -22,6 +27,8 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    # main → prod, anything else (dev) → dev.
+    environment: ${{ github.ref_name == 'main' && 'prod' || 'dev' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -30,12 +37,18 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
-      - run: npm run build
-      - run: npm run build:play
+      # prod serves the default Coming Soon build; dev serves the playable game.
+      - name: Build
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            npm run build
+          else
+            npm run build:play
+          fi
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-      - run: aws s3 sync ./dist s3://${{ secrets.AWS_S3_BUCKET }} --delete
-      - run: aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+      - run: aws s3 sync ./dist s3://${{ vars.AWS_S3_BUCKET }} --delete
+      - run: aws cloudfront create-invalidation --distribution-id ${{ vars.AWS_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
