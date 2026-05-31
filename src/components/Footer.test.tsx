@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { Footer } from "./Footer";
+import pkg from "../../package.json";
 
-// Declare the build-time constant so TypeScript does not error on the identifier.
 declare const __APP_VERSION__: string | undefined;
 
 /**
@@ -46,8 +46,19 @@ describe("Footer", () => {
       expect(versionEl).toHaveTextContent("v0.0.1");
     });
 
-    it("renders the current app version 'v1.0.2' when __APP_VERSION__ matches the package version", () => {
-      setAppVersion("1.0.2");
+    it("renders the version matching the version field in package.json", () => {
+      setAppVersion(pkg.version);
+
+      render(<Footer />);
+
+      const versionEl = screen.getByTestId("footer-version");
+      expect(versionEl).toHaveTextContent(`v${pkg.version}`);
+    });
+
+    it("renders v1.0.2 when the build-time version is the current package version", () => {
+      expect(pkg.version).toBe("1.0.2");
+
+      setAppVersion(pkg.version);
 
       render(<Footer />);
 
