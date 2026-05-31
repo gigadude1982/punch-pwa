@@ -12,6 +12,9 @@ export interface PetState {
   /** Happiness: 100 = delighted, 0 = miserable. Raised by playing (feeding him
    *  while he's happy makes him spin), decays over time. */
   happiness: number;
+  /** Bananas on hand to feed Punch. Each feed costs one; they regrow slowly
+   *  over time up to BANANA_MAX, so feeding is rate-limited. */
+  bananas: number;
   /** Epoch milliseconds when time-based decay was last applied. */
   lastTick: number;
   /** True after over-feeding: Punch vomited and feels sick (feeding is disabled). */

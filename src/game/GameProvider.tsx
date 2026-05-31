@@ -93,9 +93,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const decayed = applyDecay(prev, now());
       const happy = isHappy(decayed);
       const fed = feedPet(decayed);
+      // `feed` returns the same reference when it's a no-op (sick or out of
+      // bananas) — only react to a feed that actually landed.
+      const fedLanded = fed !== decayed;
       // A feed landed while he's happy is also a play: he spins and cheers up.
       // (Not if the feed tipped him into sickness from over-eating.)
-      if (happy && !fed.sick) {
+      if (fedLanded && happy && !fed.sick) {
         playedRef.current = true;
         return playWith(fed);
       }

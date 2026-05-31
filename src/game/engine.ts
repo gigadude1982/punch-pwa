@@ -15,6 +15,10 @@ export const HAPPY_FULLNESS = 60;
 export const OVERFEED_LIMIT = 5;
 /** Fullness Punch is left with after throwing up. */
 export const SICK_FULLNESS = 20;
+/** Bananas on hand at the start, and the cap they regrow back up to. */
+export const BANANA_MAX = 10;
+/** Bananas that regrow per real-world minute (≈ one every two minutes). */
+export const BANANA_REGEN_PER_MINUTE = 0.5;
 
 const MS_PER_MINUTE = 60_000;
 
@@ -23,9 +27,16 @@ export function clamp(value: number, min = STAT_MIN, max = STAT_MAX): number {
   return Math.min(max, Math.max(min, value));
 }
 
-/** A brand-new, fully-fed and delighted pet. */
+/** A brand-new, fully-fed and delighted pet with a full bunch of bananas. */
 export function createInitialState(now: number): PetState {
-  return { fullness: STAT_MAX, happiness: STAT_MAX, lastTick: now, sick: false, overfeed: 0 };
+  return {
+    fullness: STAT_MAX,
+    happiness: STAT_MAX,
+    bananas: BANANA_MAX,
+    lastTick: now,
+    sick: false,
+    overfeed: 0,
+  };
 }
 
 /** Whether Punch is well-fed enough to be happy (and thus willing to play). */
@@ -48,12 +59,14 @@ export function applyDecay(state: PetState, now: number): PetState {
   }
   const fullness = clamp(state.fullness - elapsedMinutes * FULLNESS_DECAY_PER_MINUTE);
   const happiness = clamp(state.happiness - elapsedMinutes * HAPPINESS_DECAY_PER_MINUTE);
+  // Bananas regrow over time (not a 0–100 stat), capped at the bunch size.
+  const bananas = clamp(state.bananas + elapsedMinutes * BANANA_REGEN_PER_MINUTE, 0, BANANA_MAX);
   // Once he's digested enough to hold a full portion again, the over-feed
   // streak resets. (Checking `< STAT_MAX` here would clear the streak on the
   // first sliver of decay — which, since decay runs before every feed, made
   // over-feeding impossible to ever reach.)
   const overfeed = fullness + FEED_AMOUNT <= STAT_MAX ? 0 : state.overfeed;
-  return { ...state, fullness, happiness, overfeed, lastTick: now };
+  return { ...state, fullness, happiness, bananas, overfeed, lastTick: now };
 }
 
 /** Play with Punch — restores happiness up to the max. Pure. */
@@ -64,24 +77,26 @@ export function play(state: PetState): PetState {
 /**
  * Feed the pet. Restores fullness up to the max; feeding while already full
  * builds an over-feed streak, and the OVERFEED_LIMIT-th such press makes Punch
- * vomit and turn sick (fullness crashes to SICK_FULLNESS). Feeding a sick pet
- * does nothing. Pure.
+ * vomit and turn sick (fullness crashes to SICK_FULLNESS). Each feed costs one
+ * banana — feeding while sick or out of bananas does nothing (returns the same
+ * state, unchanged reference). Pure.
  */
 export function feed(state: PetState): PetState {
-  if (state.sick) {
+  if (state.sick || state.bananas < 1) {
     return state;
   }
+  const bananas = state.bananas - 1;
   // No room for a full portion → he's being crammed past full. Use overflow
   // rather than an exact `>= STAT_MAX` check so the streak survives the sliver
   // of decay applied before each press in the live game loop.
   if (state.fullness + FEED_AMOUNT > STAT_MAX) {
     const overfeed = state.overfeed + 1;
     if (overfeed >= OVERFEED_LIMIT) {
-      return { ...state, fullness: SICK_FULLNESS, sick: true, overfeed: 0 };
+      return { ...state, fullness: SICK_FULLNESS, sick: true, overfeed: 0, bananas };
     }
-    return { ...state, fullness: STAT_MAX, overfeed };
+    return { ...state, fullness: STAT_MAX, overfeed, bananas };
   }
-  return { ...state, fullness: clamp(state.fullness + FEED_AMOUNT), overfeed: 0 };
+  return { ...state, fullness: clamp(state.fullness + FEED_AMOUNT), overfeed: 0, bananas };
 }
 
 /** Recover from sickness. Pure. */
