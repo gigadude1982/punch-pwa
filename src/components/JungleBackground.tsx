@@ -1,3 +1,4 @@
+import { motion, useReducedMotion } from "framer-motion";
 import styles from "./JungleBackground.module.css";
 
 /** Decorative vines hanging from the canopy: [leftPct, heightPx, delaySec]. */
@@ -45,10 +46,52 @@ const SKYLINE: ReadonlyArray<[string, string]> = [
 ];
 
 /**
+ * A flowing river that sits beneath Punch's rock. Renders an inline SVG so its
+ * colours match the jungle palette, and animates two staggered wave bands
+ * horizontally to convey moving water. Honours `prefers-reduced-motion`.
+ */
+function River() {
+  const reduceMotion = useReducedMotion();
+  const flow = reduceMotion ? {} : { x: ["0%", "-50%"] };
+  const flowSlow = reduceMotion ? {} : { x: ["-50%", "0%"] };
+
+  return (
+    <div className={styles.river} data-testid="river">
+      <svg
+        className={styles.riverSvg}
+        viewBox="0 0 200 30"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <defs>
+          <linearGradient id="riverFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#3aa0c9" />
+            <stop offset="100%" stopColor="#1c5e7a" />
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="200" height="30" fill="url(#riverFill)" />
+        <motion.path
+          d="M0 10 Q 12.5 4 25 10 T 50 10 T 75 10 T 100 10 T 125 10 T 150 10 T 175 10 T 200 10 V30 H0 Z"
+          fill="rgba(255,255,255,0.18)"
+          animate={flow}
+          transition={{ duration: 8, ease: "linear", repeat: Infinity }}
+        />
+        <motion.path
+          d="M0 18 Q 16.6 13 33.3 18 T 66.6 18 T 100 18 T 133.3 18 T 166.6 18 T 200 18 V30 H0 Z"
+          fill="rgba(255,255,255,0.1)"
+          animate={flowSlow}
+          transition={{ duration: 12, ease: "linear", repeat: Infinity }}
+        />
+      </svg>
+    </div>
+  );
+}
+
+/**
  * The shared jungle scene — gradient sky, faint trees, swaying canopy vines,
- * drifting bananas, and a forest floor of palms. Purely decorative and
- * non-interactive; render page content above it. Used by both the landing page
- * and the game.
+ * drifting bananas, a flowing river, and a forest floor of palms. Purely
+ * decorative and non-interactive; render page content above it. Used by both
+ * the landing page and the game.
  */
 export function JungleBackground() {
   return (
@@ -90,6 +133,8 @@ export function JungleBackground() {
           </span>
         ))}
       </div>
+
+      <River />
 
       <div className={styles.jungleFloor}>
         <div className={styles.skyline}>
