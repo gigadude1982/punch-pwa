@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+import pkg from "./package.json";
 
 // The `play` build (dev → punch.gigacorp.co) and the dev server ship the real
 // game as an installable PWA. The default production build (prod →
@@ -11,6 +12,12 @@ export default defineConfig(({ mode }) => {
   const enablePlay = mode === "play" || mode === "development";
 
   return {
+    // Inject the app version from package.json as a static build-time constant.
+    // Vite performs a literal text substitution, so no runtime fetch occurs.
+    // If `version` is absent the constant resolves to the literal `undefined`.
+    define: {
+      __APP_VERSION__: JSON.stringify(pkg.version ?? undefined),
+    },
     plugins: [
       react(),
       VitePWA({
