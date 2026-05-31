@@ -1,7 +1,12 @@
 import styles from "./Footer.module.css";
 
-/** Build-time version string injected via Vite's `define` (see vite.config.ts). */
-const version = typeof __APP_VERSION__ === "string" ? __APP_VERSION__ : undefined;
+/**
+ * App version baked into the bundle at build time via Vite's `define`.
+ * Falls back to `undefined` in non-Vite contexts (e.g. Jest) so the footer
+ * degrades gracefully when the constant is not defined.
+ */
+const appVersion: string | undefined =
+  typeof __APP_VERSION__ === "string" ? __APP_VERSION__ : undefined;
 
 /** Shared site footer: copyright + GigaCorp credit + build version. */
 export function Footer() {
@@ -15,9 +20,9 @@ export function Footer() {
         </a>{" "}
         production
       </span>
-      {version ? (
+      {appVersion ? (
         <span className={styles.version} data-testid="footer-version">
-          v{version}
+          v{appVersion}
         </span>
       ) : null}
     </footer>

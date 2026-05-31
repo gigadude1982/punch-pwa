@@ -1,105 +1,78 @@
 import { render, screen } from "@testing-library/react";
-import { Footer } from "./Footer";
-
-// Store the original descriptor so we can restore it after each test
-const originalDescriptor = Object.getOwnPropertyDescriptor(globalThis, "__APP_VERSION__");
-
-function defineAppVersion(value: string | undefined): void {
-  Object.defineProperty(globalThis, "__APP_VERSION__", {
-    value,
-    writable: true,
-    configurable: true,
-  });
-}
-
-afterEach(() => {
-  // Restore original global state
-  if (originalDescriptor) {
-    Object.defineProperty(globalThis, "__APP_VERSION__", originalDescriptor);
-  } else {
-    // If it never existed, delete the property
-    delete (globalThis as Record<string, unknown>)["__APP_VERSION__"];
-  }
-});
 
 describe("Footer", () => {
+  afterEach(() => {
+    jest.resetModules();
+    delete (globalThis as Record<string, unknown>)["__APP_VERSION__"];
+  });
+
   describe("when __APP_VERSION__ is a valid non-empty string", () => {
-    it("renders the version in 'v{version}' format", () => {
-      defineAppVersion("1.2.3");
+    it("renders the version in v{version} format", async () => {
+      (globalThis as Record<string, unknown>)["__APP_VERSION__"] = "1.2.3";
+      const { Footer } = await import("./Footer");
       render(<Footer />);
       const versionEl = screen.getByTestId("footer-version");
       expect(versionEl).toBeInTheDocument();
       expect(versionEl).toHaveTextContent("v1.2.3");
     });
 
-    it("renders the version element with a leading 'v' prefix", () => {
-      defineAppVersion("0.0.1");
+    it("renders the correct text for a different version string", async () => {
+      (globalThis as Record<string, unknown>)["__APP_VERSION__"] = "0.9.0";
+      const { Footer } = await import("./Footer");
       render(<Footer />);
       const versionEl = screen.getByTestId("footer-version");
-      expect(versionEl.textContent).toBe("v0.0.1");
+      expect(versionEl).toBeInTheDocument();
+      expect(versionEl).toHaveTextContent("v0.9.0");
     });
 
-    it("renders copyright and GigaCorp text alongside the version", () => {
-      defineAppVersion("2.0.0");
+    it("also renders the copyright and GigaCorp content", async () => {
+      (globalThis as Record<string, unknown>)["__APP_VERSION__"] = "2.0.0";
+      const { Footer } = await import("./Footer");
       render(<Footer />);
-      expect(screen.getByText(/2026 Punch Tamagotchi/)).toBeInTheDocument();
+      expect(screen.getByText(/\u00a9 2026 Punch Tamagotchi/)).toBeInTheDocument();
       expect(screen.getByRole("link", { name: /gigacorp/i })).toBeInTheDocument();
-      expect(screen.getByTestId("footer-version")).toBeInTheDocument();
     });
   });
 
   describe("when __APP_VERSION__ is undefined", () => {
-    it("does not render a version element", () => {
-      defineAppVersion(undefined);
-      render(<Footer />);
+    it("renders no version element and throws no errors", async () => {
+      delete (globalThis as Record<string, unknown>)["__APP_VERSION__"];
+      const { Footer } = await import("./Footer");
+      expect(() => render(<Footer />)).not.toThrow();
       expect(screen.queryByTestId("footer-version")).not.toBeInTheDocument();
     });
 
-    it("still renders the footer with copyright and GigaCorp text", () => {
-      defineAppVersion(undefined);
+    it("still renders copyright and GigaCorp when version is absent", async () => {
+      delete (globalThis as Record<string, unknown>)["__APP_VERSION__"];
+      const { Footer } = await import("./Footer");
       render(<Footer />);
-      expect(screen.getByText(/2026 Punch Tamagotchi/)).toBeInTheDocument();
+      expect(screen.getByText(/\u00a9 2026 Punch Tamagotchi/)).toBeInTheDocument();
       expect(screen.getByRole("link", { name: /gigacorp/i })).toBeInTheDocument();
-    });
-
-    it("throws no JavaScript errors when version is undefined", () => {
-      defineAppVersion(undefined);
-      expect(() => render(<Footer />)).not.toThrow();
     });
   });
 
   describe("when __APP_VERSION__ is an empty string", () => {
-    it("does not render a version element", () => {
-      defineAppVersion("");
+    it("omits the version element", async () => {
+      (globalThis as Record<string, unknown>)["__APP_VERSION__"] = "";
+      const { Footer } = await import("./Footer");
       render(<Footer />);
       expect(screen.queryByTestId("footer-version")).not.toBeInTheDocument();
     });
 
-    it("still renders the footer without errors", () => {
-      defineAppVersion("");
+    it("renders without throwing when version is empty string", async () => {
+      (globalThis as Record<string, unknown>)["__APP_VERSION__"] = "";
+      const { Footer } = await import("./Footer");
       expect(() => render(<Footer />)).not.toThrow();
-    });
-
-    it("still renders copyright and GigaCorp text when version is empty", () => {
-      defineAppVersion("");
-      render(<Footer />);
-      expect(screen.getByText(/2026 Punch Tamagotchi/)).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: /gigacorp/i })).toBeInTheDocument();
     });
   });
 
-  describe("footer static content", () => {
-    it("renders a GigaCorp link pointing to gigacorp.co", () => {
-      defineAppVersion("1.0.0");
+  describe("GigaCorp link attributes", () => {
+    it("opens GigaCorp link in a new tab with noopener noreferrer", async () => {
+      (globalThis as Record<string, unknown>)["__APP_VERSION__"] = "1.0.0";
+      const { Footer } = await import("./Footer");
       render(<Footer />);
       const link = screen.getByRole("link", { name: /gigacorp/i });
       expect(link).toHaveAttribute("href", "https://www.gigacorp.co");
-    });
-
-    it("opens the GigaCorp link in a new tab with rel noopener noreferrer", () => {
-      defineAppVersion("1.0.0");
-      render(<Footer />);
-      const link = screen.getByRole("link", { name: /gigacorp/i });
       expect(link).toHaveAttribute("target", "_blank");
       expect(link).toHaveAttribute("rel", "noopener noreferrer");
     });

@@ -2,6 +2,23 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App";
 
+jest.mock("framer-motion", () => {
+  const React = require("react") as typeof import("react");
+  return {
+    AnimatePresence: ({ children }: { children: React.ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+    motion: new Proxy(
+      {} as Record<string, unknown>,
+      {
+        get:
+          (_target: Record<string, unknown>, prop: string) =>
+          ({ children, ...rest }: { children?: React.ReactNode; [key: string]: unknown }) =>
+            React.createElement(prop, rest, children),
+      },
+    ),
+  };
+});
+
 beforeEach(() => {
   localStorage.clear();
 });
@@ -40,18 +57,28 @@ describe("App", () => {
     });
   });
 
-  describe("Footer visibility", () => {
-    it("renders the footer on the landing page (enablePlay=false)", () => {
+  describe("Footer is mounted on every page", () => {
+    it("renders the footer landmark on the landing page when enablePlay is false", () => {
       render(<App enablePlay={false} />);
       expect(screen.getByRole("contentinfo")).toBeInTheDocument();
     });
 
-    it("renders the footer on the landing page (enablePlay=true)", () => {
+    it("renders the footer landmark on the landing page when enablePlay is true", () => {
       render(<App enablePlay={true} />);
       expect(screen.getByRole("contentinfo")).toBeInTheDocument();
     });
 
-    it("renders the footer after navigating to the game view", async () => {
+    it("renders the copyright text in the footer on the landing page", () => {
+      render(<App enablePlay={false} />);
+      expect(screen.getByText(/2026 Punch Tamagotchi/)).toBeInTheDocument();
+    });
+
+    it("renders the GigaCorp link in the footer", () => {
+      render(<App enablePlay={false} />);
+      expect(screen.getByRole("link", { name: /gigacorp/i })).toBeInTheDocument();
+    });
+
+    it("renders the footer in the game view after Play is clicked", async () => {
       const user = userEvent.setup();
       render(<App enablePlay={true} />);
       await user.click(screen.getByRole("button", { name: /play/i }));
@@ -59,17 +86,9 @@ describe("App", () => {
       expect(screen.getByRole("contentinfo")).toBeInTheDocument();
     });
 
-    it("footer contains copyright text", () => {
+    it("does not render a version span when __APP_VERSION__ is undefined in Jest", () => {
       render(<App enablePlay={false} />);
-      const footer = screen.getByRole("contentinfo");
-      expect(footer).toHaveTextContent(/2026 Punch Tamagotchi/i);
-    });
-
-    it("footer contains the GigaCorp link", () => {
-      render(<App enablePlay={false} />);
-      expect(
-        screen.getByRole("link", { name: /gigacorp/i }),
-      ).toBeInTheDocument();
+      expect(screen.queryByTestId("footer-version")).not.toBeInTheDocument();
     });
   });
 });
