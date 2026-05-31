@@ -1,18 +1,17 @@
-/* River that sits within the jungle floor, beneath Punch's rock. */
+/* Flowing river that sits in the jungle floor, behind Punch's rock. */
 .river {
-  --river-light: #5bc8e6;
-  --river-mid: #2f9fd1;
-  --river-deep: #15648f;
-  --river-foam: #d7f4ff;
+  --river-light: #5fc6e8;
+  --river-mid: #2f9bd1;
+  --river-deep: #1c6fa3;
+  --river-foam: #d8f4ff;
 
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 28px;
-  width: 100%;
-  height: clamp(60px, 12vh, 130px);
-  /* Render behind the rock; the backdrop establishes the z-index: 0 context. */
+  bottom: 38px;
+  /* Lower than the rock so the river renders behind it. */
   z-index: 1;
+  height: clamp(60px, 12vh, 120px);
   pointer-events: none;
   overflow: hidden;
 }
@@ -25,7 +24,7 @@
 
 @media (max-width: 640px) {
   .river {
-    bottom: 20px;
+    bottom: 30px;
     height: clamp(48px, 14vh, 90px);
   }
 }

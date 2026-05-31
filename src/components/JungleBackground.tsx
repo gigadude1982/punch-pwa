@@ -1,5 +1,4 @@
 import { motion, useReducedMotion } from "framer-motion";
-
 import styles from "./JungleBackground.module.css";
 
 /** Decorative vines hanging from the canopy: [leftPct, heightPx, delaySec]. */
@@ -47,38 +46,39 @@ const SKYLINE: ReadonlyArray<[string, string]> = [
 ];
 
 /**
- * A flowing river that sits behind Punch's rock. Rendered as a wide,
- * full-width SVG band of stacked wavy stripes; framer-motion shifts the
- * stripes horizontally to convey gently moving water. Honors
- * prefers-reduced-motion by holding still. Colors are drawn from the
- * jungle palette (CSS variables on .backdrop) for visual consistency.
+ * A flowing jungle river. Rendered as a tiling inline SVG band whose wave
+ * layers slide horizontally to convey moving water. Sits low in the scene so it
+ * appears beneath Punch's rock, and respects reduced-motion preferences. Purely
+ * decorative and non-interactive.
  */
 function River() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <div className={styles.river} data-testid="jungle-river" aria-hidden="true">
+    <div className={styles.river} data-testid="jungle-river">
       <motion.svg
-        className={styles.riverSvg}
-        viewBox="0 0 1200 200"
+        className={styles.riverWaves}
+        viewBox="0 0 240 60"
         preserveAspectRatio="none"
-        animate={reduceMotion ? undefined : { x: [0, -120, 0] }}
+        aria-hidden="true"
+        animate={reduceMotion ? undefined : { x: ["0%", "-50%"] }}
         transition={
-          reduceMotion ? undefined : { duration: 9, ease: "easeInOut", repeat: Infinity }
+          reduceMotion
+            ? undefined
+            : { repeat: Infinity, repeatType: "loop", ease: "linear", duration: 12 }
         }
       >
-        <rect x="-200" y="0" width="1600" height="200" className={styles.riverBase} />
         <path
-          className={styles.riverWave1}
-          d="M-200 60 Q 100 40 400 60 T 1000 60 T 1600 60 V 200 H -200 Z"
+          className={styles.riverDeep}
+          d="M0 30 Q15 18 30 30 T60 30 T90 30 T120 30 T150 30 T180 30 T210 30 T240 30 V60 H0 Z"
         />
         <path
-          className={styles.riverWave2}
-          d="M-200 110 Q 150 90 450 110 T 1050 110 T 1600 110 V 200 H -200 Z"
+          className={styles.riverMid}
+          d="M0 38 Q15 28 30 38 T60 38 T90 38 T120 38 T150 38 T180 38 T210 38 T240 38 V60 H0 Z"
         />
         <path
-          className={styles.riverWave3}
-          d="M-200 150 Q 200 135 500 150 T 1100 150 T 1600 150 V 200 H -200 Z"
+          className={styles.riverShine}
+          d="M0 26 Q15 20 30 26 T60 26 T90 26 T120 26 T150 26 T180 26 T210 26 T240 26 V32 Q225 38 210 32 T180 32 T150 32 T120 32 T90 32 T60 32 T30 32 T0 32 Z"
         />
       </motion.svg>
     </div>
@@ -88,8 +88,8 @@ function River() {
 /**
  * The shared jungle scene — gradient sky, faint trees, swaying canopy vines,
  * drifting bananas, a flowing river, and a forest floor of palms. Purely
- * decorative and non-interactive; render page content (including Punch's rock)
- * above it. Used by both the landing page and the game.
+ * decorative and non-interactive; render page content above it. Used by both
+ * the landing page and the game.
  */
 export function JungleBackground() {
   return (
