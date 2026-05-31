@@ -1,0 +1,60 @@
+# giga-sync-lockfile — keeps package-lock.json in sync with package.json on the
+# autonomous pipeline's PRs. The pipeline commits files via the GitHub Git Data
+# API and never runs npm, so a package.json change lands with a stale lockfile
+# that fails `npm ci`. This Action regenerates the lockfile (npm produces the
+# integrity hashes the agent can't) and pushes it back onto the PR branch.
+#
+# Install into a TARGET repo with: scripts/install-pipeline-workflows.sh <owner/repo>
+# (it also sets the GIGA_PIPELINE_TOKEN secret this workflow needs).
+name: giga-sync-lockfile
+
+on:
+  pull_request:
+    paths:
+      - "package.json"
+      - "**/package.json"
+
+# Cancel a superseded sync if the pipeline pushes again while one is running.
+concurrency:
+  group: giga-sync-lockfile-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    # Only touch the pipeline's own branches (branch_prefix default "auto/"),
+    # never human PRs. Skip forks — they can't access the secret anyway.
+    if: >-
+      startsWith(github.head_ref, 'auto/') &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          # Check out + push with the pipeline PAT, NOT the default GITHUB_TOKEN:
+          # a push made with GITHUB_TOKEN does not re-trigger workflows, so the CI
+          # gate would never run on the synced commit and the pipeline would hang.
+          token: ${{ secrets.GIGA_PIPELINE_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Regenerate package-lock.json from package.json
+        # --package-lock-only resolves the tree and rewrites the lock without
+        # installing node_modules, so this is fast.
+        run: npm install --package-lock-only --ignore-scripts
+
+      - name: Commit the lockfile if it changed
+        run: |
+          if git diff --quiet -- package-lock.json; then
+            echo "package-lock.json already in sync — nothing to do."
+            exit 0
+          fi
+          git config user.name  "giga-pipeline[bot]"
+          git config user.email "giga-pipeline[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "chore: sync package-lock.json with package.json"
+          git push
