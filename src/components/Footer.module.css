@@ -1,0 +1,35 @@
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.8rem;
+  color: #fff8e7;
+  opacity: 0.9;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
+.footer a {
+  color: #ffd23f;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: 600;
+}
+
+.footer a:hover {
+  color: #fff;
+}
+
+@media (max-width: 640px) {
+  .footer {
+    flex-direction: column;
+    gap: 0.15rem;
+    text-align: center;
+  }
+}

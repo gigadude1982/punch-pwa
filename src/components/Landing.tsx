@@ -1,4 +1,5 @@
 import { JungleBackground } from "./JungleBackground";
+import { Footer } from "./Footer";
 import styles from "./Landing.module.css";
 
 interface LandingProps {
@@ -49,6 +50,8 @@ export function Landing({ enablePlay, onPlay }: LandingProps) {
           <span className={styles.badge}>🍌 Coming Soon 🍌</span>
         )}
       </main>
+
+      <Footer />
     </div>
   );
 }
