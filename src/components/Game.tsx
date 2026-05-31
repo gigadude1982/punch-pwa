@@ -5,11 +5,12 @@ import styles from "./Game.module.css";
 
 /** The game shell: the pet, its stat meters, and the action buttons. */
 export function Game() {
-  const { pet, feed } = useGame();
+  const { pet, feed, spinCount } = useGame();
   return (
     <section className={styles.game}>
-      <Pet fullness={pet.fullness} sick={pet.sick} />
+      <Pet fullness={pet.fullness} sick={pet.sick} spinCount={spinCount} />
       <StatMeter label="Fullness 🍌" value={pet.fullness} />
+      <StatMeter label="Happiness 😊" value={pet.happiness} />
       <div className={styles.actions}>
         <button
           type="button"
