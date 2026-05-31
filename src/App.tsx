@@ -32,12 +32,17 @@ function App({ enablePlay }: AppProps) {
           transition={{ duration: 0.5 }}
         >
           <JungleBackground />
-          <h1 className={styles.title}>
-            <span aria-hidden="true">🐒</span> Punch <span aria-hidden="true">🦧</span>
-          </h1>
-          <GameProvider>
-            <Game />
-          </GameProvider>
+          {/* Foreground sits above the fixed jungle backdrop (mirrors Landing's
+              .card). Without its own stacking layer, this static-flow content
+              paints *behind* the positioned backdrop and disappears. */}
+          <div className={styles.foreground}>
+            <h1 className={styles.title}>
+              <span aria-hidden="true">🐒</span> Punch <span aria-hidden="true">🦧</span>
+            </h1>
+            <GameProvider>
+              <Game />
+            </GameProvider>
+          </div>
           <Footer />
         </motion.main>
       )}
