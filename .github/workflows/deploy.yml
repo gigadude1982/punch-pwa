@@ -3,11 +3,12 @@ name: Deploy punch-pwa to S3
 permissions:
   contents: read
 
-# Deploys the Play build (landing → Play → game) to the dev/staging bucket
-# (punch.gigacorp.co) on every push to main. Production (punchtamagotchi.com)
-# serves the default build (Coming Soon landing, no game) and is deployed
-# MANUALLY — it is NOT touched by this workflow. Target bucket and distribution
-# are driven by repo secrets, mirroring gigacorp-react's deploy.
+# Deploys the Play build (landing → Play → game) to the dev bucket
+# (dev.punchtamagotchi.com) on every push to main. Production
+# (www.punchtamagotchi.com) serves the default build (Coming Soon landing, no
+# game) and is deployed MANUALLY — it is NOT touched by this workflow. Target
+# bucket and distribution are driven by repo secrets, mirroring gigacorp-react's
+# deploy.
 
 on:
   push:

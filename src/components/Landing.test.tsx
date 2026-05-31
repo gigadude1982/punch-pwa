@@ -10,6 +10,12 @@ describe("Landing", () => {
     expect(screen.queryByRole("button", { name: /play/i })).not.toBeInTheDocument();
   });
 
+  it("links the Coming Soon badge to gigacorp.co", () => {
+    render(<Landing enablePlay={false} onPlay={jest.fn()} />);
+    const badge = screen.getByRole("link", { name: /coming soon/i });
+    expect(badge).toHaveAttribute("href", "https://www.gigacorp.co");
+  });
+
   it("shows an accessible Play button when play is enabled", () => {
     render(<Landing enablePlay={true} onPlay={jest.fn()} />);
     expect(screen.getByRole("button", { name: /play/i })).toBeInTheDocument();

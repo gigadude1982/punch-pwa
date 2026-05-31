@@ -47,7 +47,14 @@ export function Landing({ enablePlay, onPlay }: LandingProps) {
             Play
           </button>
         ) : (
-          <span className={styles.badge}>🍌 Coming Soon 🍌</span>
+          <a
+            className={styles.badge}
+            href="https://www.gigacorp.co"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            🍌 Coming Soon 🍌
+          </a>
         )}
       </main>
 
