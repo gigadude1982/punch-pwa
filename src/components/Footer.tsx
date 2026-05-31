@@ -1,15 +1,17 @@
 import styles from "./Footer.module.css";
 
 /**
- * The app version, injected at build time by Vite's `define` config from
- * package.json. Guarded with `typeof` so it is safe to read in environments
- * (e.g. Jest) where the constant may not be defined.
+ * `__APP_VERSION__` is injected at build time by Vite's `define` config from
+ * package.json's `version` field. It may be undefined in environments (e.g.
+ * Jest) where the define is not applied, so it is read defensively.
  */
-const appVersion: string | undefined =
-  typeof __APP_VERSION__ === "string" ? __APP_VERSION__ : undefined;
+declare const __APP_VERSION__: string | undefined;
 
-/** Shared site footer: copyright + GigaCorp credit + build version. */
+/** Shared site footer: copyright + GigaCorp credit + build-time app version. */
 export function Footer() {
+  const version =
+    typeof __APP_VERSION__ === "string" && __APP_VERSION__.length > 0 ? __APP_VERSION__ : undefined;
+
   return (
     <footer className={styles.footer}>
       <span>© 2026 Punch Tamagotchi</span>
@@ -20,9 +22,9 @@ export function Footer() {
         </a>{" "}
         production
       </span>
-      {appVersion ? (
+      {version ? (
         <span className={styles.version} data-testid="footer-version">
-          v{appVersion}
+          v{version}
         </span>
       ) : null}
     </footer>

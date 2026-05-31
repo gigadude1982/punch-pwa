@@ -4,10 +4,10 @@ import { VitePWA } from "vite-plugin-pwa";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-// Read the version from package.json at config-evaluation time (runs in Node
-// during build only — never at app runtime). It is injected below via `define`
-// as the compile-time global constant `__APP_VERSION__`, baked into the bundle
-// as a string literal with no runtime fetching or JSON parsing.
+// Read the version from package.json at config-evaluation time (Node only, at
+// build time — never at app runtime). This is injected below via `define` as
+// the compile-time global constant `__APP_VERSION__`, baked into the bundle as
+// a string literal with no runtime fetching or JSON parsing.
 const pkg = JSON.parse(
   readFileSync(fileURLToPath(new URL("./package.json", import.meta.url)), "utf-8"),
 ) as { version?: string };

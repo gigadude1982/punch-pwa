@@ -7,9 +7,8 @@ interface ImportMetaEnv {
 }
 
 /**
- * App version injected at build time from package.json via Vite's `define`
- * config. May be `undefined` in environments where the constant is not
- * replaced (e.g. Jest), so the Footer reads it defensively.
+ * App version injected at build time from package.json via Vite's `define`.
+ * May be undefined in environments (e.g. Jest) that don't process `define`.
  */
 declare const __APP_VERSION__: string | undefined;
 
