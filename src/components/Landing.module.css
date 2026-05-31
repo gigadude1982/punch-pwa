@@ -93,6 +93,12 @@
   border: 2px solid var(--bark);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
   animation: pulse 2.4s ease-in-out infinite;
+  text-decoration: none;
+  cursor: pointer;
+  transition: filter 150ms ease;
+}
+.badge:hover {
+  filter: brightness(1.06);
 }
 @keyframes pulse {
   0%,
