@@ -6,10 +6,10 @@ import { STORAGE_KEY } from "../game/storage";
 import { BANANA_MAX } from "../game/engine";
 
 /** The game shell as App mounts it once Play is pressed — without the landing flow. */
-function renderGame() {
+function renderGame(onExit: () => void = () => {}) {
   return render(
     <GameProvider>
-      <Game />
+      <Game onExit={onExit} />
     </GameProvider>,
   );
 }
@@ -92,6 +92,14 @@ describe("Game", () => {
     renderGame();
     expect(screen.getByText(`🍌 0 / ${BANANA_MAX}`)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /feed/i })).toBeDisabled();
+  });
+
+  it("calls onExit when the Back button is pressed", async () => {
+    const user = userEvent.setup();
+    const onExit = jest.fn();
+    renderGame(onExit);
+    await user.click(screen.getByRole("button", { name: /back/i }));
+    expect(onExit).toHaveBeenCalledTimes(1);
   });
 
   it("persists state across a remount", async () => {

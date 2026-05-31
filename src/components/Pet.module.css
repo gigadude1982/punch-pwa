@@ -5,17 +5,21 @@
   gap: 0.5rem;
 }
 
-/* Punch + his (sometimes-present) plush orangutan sit side by side. */
+/* Punch + his (sometimes-present) plush orangutan sit side by side, perched on
+   the rocks — so the sprites are lifted clear of the stage floor. */
 .stage {
   position: relative;
   display: flex;
   align-items: flex-end;
   justify-content: center;
   gap: 0.25rem;
-  min-height: 7rem;
+  min-height: 8rem;
+  padding-bottom: 1.3rem;
 }
 
 .sprite {
+  position: relative;
+  z-index: 1;
   font-size: 6rem;
   line-height: 1;
   filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.25));
@@ -23,11 +27,64 @@
 }
 
 .companion {
+  position: relative;
+  z-index: 1;
   font-size: 3.4rem;
   line-height: 1;
   filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.3));
   user-select: none;
   align-self: flex-end;
+}
+
+/* A little cluster of gray boulders for Punch to sit on. */
+.rocks {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12rem;
+  height: 2.8rem;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.rocks span {
+  position: absolute;
+  bottom: 0;
+  border-radius: 48% 52% 46% 54% / 62% 64% 40% 42%;
+  background: radial-gradient(120% 130% at 38% 22%, #c2c6cc 0%, #969ba2 45%, #6b7077 100%);
+  box-shadow:
+    inset 0 -0.4rem 0.6rem rgba(0, 0, 0, 0.28),
+    inset 0 0.25rem 0.4rem rgba(255, 255, 255, 0.35),
+    0 0.45rem 0.7rem rgba(0, 0, 0, 0.3);
+}
+
+.rockMain {
+  width: 7.5rem;
+  height: 2.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.rockLeft {
+  width: 4.4rem;
+  height: 1.9rem;
+  left: 0.3rem;
+}
+
+.rockRight {
+  width: 4.6rem;
+  height: 2rem;
+  right: 0.3rem;
+}
+
+.rockBack {
+  width: 6rem;
+  height: 1.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 1.6rem;
+  filter: brightness(0.92);
 }
 
 /* Vomit splat that pops under Punch when he over-eats. */
