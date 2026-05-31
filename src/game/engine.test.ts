@@ -1,19 +1,24 @@
 import {
   FEED_AMOUNT,
   FULLNESS_DECAY_PER_MINUTE,
+  HAPPINESS_DECAY_PER_MINUTE,
+  HAPPY_FULLNESS,
   OVERFEED_LIMIT,
+  PLAY_AMOUNT,
   SICK_FULLNESS,
   applyDecay,
   clamp,
   createInitialState,
   feed,
+  isHappy,
+  play,
   recover,
 } from "./engine";
 import { STAT_MAX, type PetState } from "./types";
 
-/** A healthy pet at the given fullness, for terse test setup. */
+/** A healthy pet at the given fullness/happiness, for terse test setup. */
 function pet(overrides: Partial<PetState> = {}): PetState {
-  return { fullness: 50, lastTick: 0, sick: false, overfeed: 0, ...overrides };
+  return { fullness: 50, happiness: 50, lastTick: 0, sick: false, overfeed: 0, ...overrides };
 }
 
 describe("clamp", () => {
@@ -25,9 +30,15 @@ describe("clamp", () => {
 });
 
 describe("createInitialState", () => {
-  it("starts fully fed and healthy at the given time", () => {
+  it("starts fully fed, delighted, and healthy at the given time", () => {
     const state = createInitialState(1_000);
-    expect(state).toEqual({ fullness: 100, lastTick: 1_000, sick: false, overfeed: 0 });
+    expect(state).toEqual({
+      fullness: 100,
+      happiness: 100,
+      lastTick: 1_000,
+      sick: false,
+      overfeed: 0,
+    });
   });
 });
 
@@ -43,6 +54,12 @@ describe("applyDecay", () => {
   it("never drops below zero", () => {
     const decayed = applyDecay(pet({ fullness: 10 }), 60 * 60_000); // an hour
     expect(decayed.fullness).toBe(0);
+  });
+
+  it("reduces happiness proportional to elapsed minutes, clamped at zero", () => {
+    const decayed = applyDecay(pet({ happiness: 100 }), 2 * 60_000);
+    expect(decayed.happiness).toBe(100 - 2 * HAPPINESS_DECAY_PER_MINUTE);
+    expect(applyDecay(pet({ happiness: 5 }), 60 * 60_000).happiness).toBe(0);
   });
 
   it("is a no-op when no time has elapsed and never raises stats on clock skew", () => {
@@ -111,6 +128,27 @@ describe("feed", () => {
     }
     expect(state.sick).toBe(true);
     expect(state.fullness).toBe(SICK_FULLNESS);
+  });
+});
+
+describe("play", () => {
+  it("restores happiness, clamped at the max", () => {
+    expect(play(pet({ happiness: 40 })).happiness).toBe(40 + PLAY_AMOUNT);
+    expect(play(pet({ happiness: 90 })).happiness).toBe(100);
+  });
+
+  it("does not mutate the input state", () => {
+    const state = pet({ happiness: 40 });
+    play(state);
+    expect(state.happiness).toBe(40);
+  });
+});
+
+describe("isHappy", () => {
+  it("is true only when well-fed and not sick", () => {
+    expect(isHappy(pet({ fullness: HAPPY_FULLNESS + 1 }))).toBe(true);
+    expect(isHappy(pet({ fullness: HAPPY_FULLNESS }))).toBe(false); // boundary is exclusive
+    expect(isHappy(pet({ fullness: 100, sick: true }))).toBe(false);
   });
 });
 

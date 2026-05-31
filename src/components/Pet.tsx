@@ -7,7 +7,12 @@ interface PetProps {
   fullness: number;
   /** True while Punch is recovering from over-eating. */
   sick: boolean;
+  /** Increments each time Punch plays (a happy feed) — each bump spins him 5×. */
+  spinCount: number;
 }
+
+/** Full turns Punch does on each play. */
+const SPINS_PER_PLAY = 5;
 
 type Mood = "happy" | "peckish" | "hungry" | "sick";
 
@@ -34,32 +39,33 @@ const COMPANION_IN = 100;
 const COMPANION_OUT = 25;
 
 /**
- * Punch the Japanese macaque. Bobs idly (faster when hungry), spins a full 360
- * and hoots when stuffed to 100%, and retches when over-fed. His plush
+ * Punch the Japanese macaque. Bobs idly (faster when hungry), spins 5× and
+ * hoots each time he plays (a happy feed), and retches when over-fed. His plush
  * orangutan appears once he's fully happy and runs off — with a scream — if he
  * gets too hungry.
  */
-export function Pet({ fullness, sick }: PetProps) {
+export function Pet({ fullness, sick, spinCount }: PetProps) {
   const mood = moodFor(fullness, sick);
   const spin = useAnimationControls();
 
   const [companionVisible, setCompanionVisible] = useState(fullness >= COMPANION_IN);
   const [showVomit, setShowVomit] = useState(false);
 
-  const prevFullness = useRef(fullness);
   const prevSick = useRef(sick);
   const prevCompanion = useRef(companionVisible);
+  const prevSpin = useRef(spinCount);
+  // Absolute rotation so back-to-back plays chain smoothly instead of snapping.
+  const rotation = useRef(0);
 
-  // Hit 100% → spin + hoot (rising edge only, so not on first load).
+  // Each play → spin 5× and hoot (rising edge only, so not on first load).
   useEffect(() => {
-    if (prevFullness.current < COMPANION_IN && fullness >= COMPANION_IN) {
+    if (spinCount !== prevSpin.current) {
+      prevSpin.current = spinCount;
       playHoot();
-      void spin
-        .start({ rotate: 360, transition: { duration: 0.8, ease: "easeInOut" } })
-        .then(() => spin.set({ rotate: 0 }));
+      rotation.current += 360 * SPINS_PER_PLAY;
+      void spin.start({ rotate: rotation.current, transition: { duration: 1.4, ease: "easeInOut" } });
     }
-    prevFullness.current = fullness;
-  }, [fullness, spin]);
+  }, [spinCount, spin]);
 
   // Orangutan hysteresis: in at 100%, out below 25%, latched between.
   useEffect(() => {
