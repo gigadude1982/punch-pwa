@@ -1,9 +1,9 @@
 import styles from "./Footer.module.css";
 
 /**
- * App version baked into the bundle at build time via Vite's `define`.
- * Falls back to `undefined` in non-Vite contexts (e.g. Jest) so the footer
- * degrades gracefully when the constant is not defined.
+ * The app version, injected at build time by Vite's `define` config from
+ * package.json. Guarded with `typeof` so it is safe to read in environments
+ * (e.g. Jest) where the constant may not be defined.
  */
 const appVersion: string | undefined =
   typeof __APP_VERSION__ === "string" ? __APP_VERSION__ : undefined;

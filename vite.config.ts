@@ -4,12 +4,14 @@ import { VitePWA } from "vite-plugin-pwa";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-// Read the package version at config-eval time (Node, build-only — never at app
-// runtime) so it can be baked into the bundle as the `__APP_VERSION__` literal.
+// Read the version from package.json at config-evaluation time (runs in Node
+// during build only — never at app runtime). It is injected below via `define`
+// as the compile-time global constant `__APP_VERSION__`, baked into the bundle
+// as a string literal with no runtime fetching or JSON parsing.
 const pkg = JSON.parse(
   readFileSync(fileURLToPath(new URL("./package.json", import.meta.url)), "utf-8"),
 ) as { version?: string };
-const appVersion = typeof pkg.version === "string" ? pkg.version : "";
+const appVersion = pkg.version ?? "";
 
 // The `play` build (dev → punch.gigacorp.co) and the dev server ship the real
 // game as an installable PWA. The default production build (prod →

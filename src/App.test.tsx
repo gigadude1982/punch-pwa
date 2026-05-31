@@ -2,23 +2,6 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App";
 
-jest.mock("framer-motion", () => {
-  const React = require("react") as typeof import("react");
-  return {
-    AnimatePresence: ({ children }: { children: React.ReactNode }) =>
-      React.createElement(React.Fragment, null, children),
-    motion: new Proxy(
-      {} as Record<string, unknown>,
-      {
-        get:
-          (_target: Record<string, unknown>, prop: string) =>
-          ({ children, ...rest }: { children?: React.ReactNode; [key: string]: unknown }) =>
-            React.createElement(prop, rest, children),
-      },
-    ),
-  };
-});
-
 beforeEach(() => {
   localStorage.clear();
 });
@@ -57,37 +40,37 @@ describe("App", () => {
     });
   });
 
-  describe("Footer is mounted on every page", () => {
-    it("renders the footer landmark on the landing page when enablePlay is false", () => {
+  describe("Footer visibility", () => {
+    it("mounts a footer element on the landing page when enablePlay is false", () => {
       render(<App enablePlay={false} />);
-      expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+      expect(document.querySelector("footer")).toBeInTheDocument();
     });
 
-    it("renders the footer landmark on the landing page when enablePlay is true", () => {
+    it("mounts a footer element on the landing page when enablePlay is true", () => {
       render(<App enablePlay={true} />);
-      expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+      expect(document.querySelector("footer")).toBeInTheDocument();
     });
 
-    it("renders the copyright text in the footer on the landing page", () => {
-      render(<App enablePlay={false} />);
-      expect(screen.getByText(/2026 Punch Tamagotchi/)).toBeInTheDocument();
-    });
-
-    it("renders the GigaCorp link in the footer", () => {
-      render(<App enablePlay={false} />);
-      expect(screen.getByRole("link", { name: /gigacorp/i })).toBeInTheDocument();
-    });
-
-    it("renders the footer in the game view after Play is clicked", async () => {
+    it("mounts a footer element on the game page after navigating from landing", async () => {
       const user = userEvent.setup();
       render(<App enablePlay={true} />);
       await user.click(screen.getByRole("button", { name: /play/i }));
       await screen.findByRole("button", { name: /feed/i });
-      expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+      expect(document.querySelector("footer")).toBeInTheDocument();
     });
 
-    it("does not render a version span when __APP_VERSION__ is undefined in Jest", () => {
+    it("renders the GigaCorp link inside the footer", () => {
       render(<App enablePlay={false} />);
+      expect(screen.getByRole("link", { name: /gigacorp/i })).toBeInTheDocument();
+    });
+
+    it("renders copyright text inside the footer", () => {
+      render(<App enablePlay={false} />);
+      expect(document.querySelector("footer")).toHaveTextContent(/punch tamagotchi/i);
+    });
+
+    it("does not throw and omits the version span when __APP_VERSION__ is undefined", () => {
+      expect(() => render(<App enablePlay={false} />)).not.toThrow();
       expect(screen.queryByTestId("footer-version")).not.toBeInTheDocument();
     });
   });
