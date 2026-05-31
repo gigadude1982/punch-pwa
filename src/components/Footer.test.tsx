@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { Footer } from "./Footer";
+import pkg from "../../package.json";
 
 /**
  * Helper: (re-)define the build-time constant __APP_VERSION__ on globalThis
@@ -24,6 +25,27 @@ describe("Footer", () => {
   });
 
   describe("version display", () => {
+    it("renders the current package.json version in 'v{version}' format", () => {
+      setAppVersion(pkg.version);
+
+      render(<Footer />);
+
+      const versionEl = screen.getByTestId("footer-version");
+      expect(versionEl).toBeInTheDocument();
+      expect(versionEl).toHaveTextContent(`v${pkg.version}`);
+    });
+
+    it("reflects the bumped version 1.0.2 from package.json", () => {
+      expect(pkg.version).toBe("1.0.2");
+
+      setAppVersion(pkg.version);
+
+      render(<Footer />);
+
+      const versionEl = screen.getByTestId("footer-version");
+      expect(versionEl).toHaveTextContent("v1.0.2");
+    });
+
     it("renders the version in 'v{version}' format when __APP_VERSION__ is a valid semver string", () => {
       setAppVersion("1.2.3");
 
