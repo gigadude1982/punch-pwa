@@ -12,9 +12,9 @@ export default defineConfig(({ mode }) => {
   const enablePlay = mode === "play" || mode === "development";
 
   return {
-    // Inject the app version from package.json as a static build-time constant.
-    // Vite performs a literal text substitution, so no runtime fetch occurs.
-    // If `version` is absent the constant resolves to the literal `undefined`.
+    // Bake the package.json version in at build time as a static constant so
+    // the footer can show it without any runtime fetch. Falls back to
+    // `undefined` when the version field is absent, letting the UI degrade.
     define: {
       __APP_VERSION__: JSON.stringify(pkg.version ?? undefined),
     },

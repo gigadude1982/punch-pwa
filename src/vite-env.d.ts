@@ -7,10 +7,8 @@ interface ImportMetaEnv {
 }
 
 /**
- * App version injected at build time via Vite's `define` config from
- * package.json. Resolves to the literal version string (e.g. "1.2.3") or the
- * `undefined` literal when the version field is absent. Always guard reads with
- * `typeof __APP_VERSION__ === "string"` for graceful degradation.
+ * App version injected at build time from package.json via Vite's `define`.
+ * `undefined` when the version field is absent.
  */
 declare const __APP_VERSION__: string | undefined;
 
