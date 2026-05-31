@@ -17,7 +17,11 @@ export function Footer() {
         </a>{" "}
         production
       </span>
-      {version ? <span data-testid="footer-version">v{version}</span> : null}
+      {version ? (
+        <span className={styles.version} data-testid="footer-version">
+          v{version}
+        </span>
+      ) : null}
     </footer>
   );
 }
