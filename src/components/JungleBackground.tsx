@@ -46,41 +46,43 @@ const SKYLINE: ReadonlyArray<[string, string]> = [
 ];
 
 /**
- * A flowing jungle river. Rendered as a tiling inline SVG band whose wave
- * layers slide horizontally to convey moving water. Sits low in the scene so it
- * appears beneath Punch's rock, and respects reduced-motion preferences. Purely
- * decorative and non-interactive.
+ * A flowing river that sits beneath Punch's rock. Renders an inline SVG so its
+ * colours match the jungle palette, and animates two staggered wave bands
+ * horizontally to convey moving water. Honours `prefers-reduced-motion`.
  */
 function River() {
   const reduceMotion = useReducedMotion();
+  const flow = reduceMotion ? {} : { x: ["0%", "-50%"] };
+  const flowSlow = reduceMotion ? {} : { x: ["-50%", "0%"] };
 
   return (
-    <div className={styles.river} data-testid="jungle-river">
-      <motion.svg
-        className={styles.riverWaves}
-        viewBox="0 0 240 60"
+    <div className={styles.river} data-testid="river">
+      <svg
+        className={styles.riverSvg}
+        viewBox="0 0 200 30"
         preserveAspectRatio="none"
         aria-hidden="true"
-        animate={reduceMotion ? undefined : { x: ["0%", "-50%"] }}
-        transition={
-          reduceMotion
-            ? undefined
-            : { repeat: Infinity, repeatType: "loop", ease: "linear", duration: 12 }
-        }
       >
-        <path
-          className={styles.riverDeep}
-          d="M0 30 Q15 18 30 30 T60 30 T90 30 T120 30 T150 30 T180 30 T210 30 T240 30 V60 H0 Z"
+        <defs>
+          <linearGradient id="riverFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#3aa0c9" />
+            <stop offset="100%" stopColor="#1c5e7a" />
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="200" height="30" fill="url(#riverFill)" />
+        <motion.path
+          d="M0 10 Q 12.5 4 25 10 T 50 10 T 75 10 T 100 10 T 125 10 T 150 10 T 175 10 T 200 10 V30 H0 Z"
+          fill="rgba(255,255,255,0.18)"
+          animate={flow}
+          transition={{ duration: 8, ease: "linear", repeat: Infinity }}
         />
-        <path
-          className={styles.riverMid}
-          d="M0 38 Q15 28 30 38 T60 38 T90 38 T120 38 T150 38 T180 38 T210 38 T240 38 V60 H0 Z"
+        <motion.path
+          d="M0 18 Q 16.6 13 33.3 18 T 66.6 18 T 100 18 T 133.3 18 T 166.6 18 T 200 18 V30 H0 Z"
+          fill="rgba(255,255,255,0.1)"
+          animate={flowSlow}
+          transition={{ duration: 12, ease: "linear", repeat: Infinity }}
         />
-        <path
-          className={styles.riverShine}
-          d="M0 26 Q15 20 30 26 T60 26 T90 26 T120 26 T150 26 T180 26 T210 26 T240 26 V32 Q225 38 210 32 T180 32 T150 32 T120 32 T90 32 T60 32 T30 32 T0 32 Z"
-        />
-      </motion.svg>
+      </svg>
     </div>
   );
 }
