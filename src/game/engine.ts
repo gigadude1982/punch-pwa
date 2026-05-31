@@ -15,6 +15,8 @@ export const HAPPY_FULLNESS = 60;
 export const OVERFEED_LIMIT = 5;
 /** Fullness Punch is left with after throwing up. */
 export const SICK_FULLNESS = 20;
+/** Happiness lost when Punch over-eats and pukes — being sick is no fun. */
+export const SICK_HAPPINESS_PENALTY = 40;
 /** Bananas on hand at the start, and the cap they regrow back up to. */
 export const BANANA_MAX = 10;
 /** Bananas that regrow per real-world minute (≈ one every two minutes). */
@@ -92,7 +94,14 @@ export function feed(state: PetState): PetState {
   if (state.fullness + FEED_AMOUNT > STAT_MAX) {
     const overfeed = state.overfeed + 1;
     if (overfeed >= OVERFEED_LIMIT) {
-      return { ...state, fullness: SICK_FULLNESS, sick: true, overfeed: 0, bananas };
+      return {
+        ...state,
+        fullness: SICK_FULLNESS,
+        happiness: clamp(state.happiness - SICK_HAPPINESS_PENALTY),
+        sick: true,
+        overfeed: 0,
+        bananas,
+      };
     }
     return { ...state, fullness: STAT_MAX, overfeed, bananas };
   }

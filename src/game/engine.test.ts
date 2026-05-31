@@ -8,6 +8,7 @@ import {
   OVERFEED_LIMIT,
   PLAY_AMOUNT,
   SICK_FULLNESS,
+  SICK_HAPPINESS_PENALTY,
   applyDecay,
   clamp,
   createInitialState,
@@ -119,12 +120,13 @@ describe("feed", () => {
     expect(fed.sick).toBe(false);
   });
 
-  it("vomits and turns sick on the OVERFEED_LIMIT-th press while full", () => {
-    const stuffed = pet({ fullness: 100, overfeed: OVERFEED_LIMIT - 1 });
+  it("vomits, turns sick, and loses happiness on the OVERFEED_LIMIT-th press while full", () => {
+    const stuffed = pet({ fullness: 100, happiness: 90, overfeed: OVERFEED_LIMIT - 1 });
     const sick = feed(stuffed);
     expect(sick.sick).toBe(true);
     expect(sick.fullness).toBe(SICK_FULLNESS);
     expect(sick.overfeed).toBe(0);
+    expect(sick.happiness).toBe(90 - SICK_HAPPINESS_PENALTY); // puking is miserable
   });
 
   it("ignores feeding while sick", () => {

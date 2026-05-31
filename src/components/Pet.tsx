@@ -105,6 +105,13 @@ export function Pet({ fullness, sick, spinCount }: PetProps) {
   return (
     <div className={styles.pet} data-mood={mood}>
       <div className={styles.stage}>
+        {/* Gray jungle rocks Punch is perched on. */}
+        <div className={styles.rocks} aria-hidden="true">
+          <span className={styles.rockBack} />
+          <span className={styles.rockLeft} />
+          <span className={styles.rockRight} />
+          <span className={styles.rockMain} />
+        </div>
         <motion.div className={styles.sprite} animate={spin}>
           <motion.div
             role="img"
