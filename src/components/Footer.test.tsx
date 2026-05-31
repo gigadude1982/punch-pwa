@@ -24,6 +24,16 @@ describe("Footer", () => {
   });
 
   describe("version display", () => {
+    it("renders 'v1.0.0' when __APP_VERSION__ is '1.0.0' (the official release version)", () => {
+      setAppVersion("1.0.0");
+
+      render(<Footer />);
+
+      const versionEl = screen.getByTestId("footer-version");
+      expect(versionEl).toBeInTheDocument();
+      expect(versionEl).toHaveTextContent("v1.0.0");
+    });
+
     it("renders the version in 'v{version}' format when __APP_VERSION__ is a valid semver string", () => {
       setAppVersion("1.2.3");
 
@@ -85,6 +95,15 @@ describe("Footer", () => {
       const link = screen.getByRole("link", { name: /gigacorp/i });
       expect(link).toHaveAttribute("target", "_blank");
       expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    });
+
+    it("renders copyright notice alongside the version when version is set", () => {
+      setAppVersion("1.0.0");
+
+      render(<Footer />);
+
+      expect(screen.getByText(/2026 Punch Tamagotchi/i)).toBeInTheDocument();
+      expect(screen.getByTestId("footer-version")).toHaveTextContent("v1.0.0");
     });
   });
 
