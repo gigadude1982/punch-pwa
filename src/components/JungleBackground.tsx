@@ -1,4 +1,4 @@
-import { River } from "./River";
+import { motion, useReducedMotion } from "framer-motion";
 import styles from "./JungleBackground.module.css";
 
 /** Decorative vines hanging from the canopy: [leftPct, heightPx, delaySec]. */
@@ -46,13 +46,58 @@ const SKYLINE: ReadonlyArray<[string, string]> = [
 ];
 
 /**
+ * A flowing river that sits beneath Punch's rock. Rendered behind the rock via
+ * a low z-index in the CSS module and positioned within the jungle floor band.
+ * The water motion is driven by framer-motion (looping translateX on layered
+ * wave paths) and respects prefers-reduced-motion for accessibility.
+ */
+function River() {
+  const reduceMotion = useReducedMotion();
+
+  const drift = reduceMotion ? undefined : { x: [0, -40, 0] };
+  const driftSlow = reduceMotion ? undefined : { x: [0, 36, 0] };
+
+  return (
+    <div className={styles.river} data-testid="river">
+      <svg
+        className={styles.riverSvg}
+        viewBox="0 0 400 80"
+        preserveAspectRatio="none"
+        role="presentation"
+      >
+        <defs>
+          <linearGradient id="riverGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#3fb0d8" />
+            <stop offset="100%" stopColor="#1c6f99" />
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="400" height="80" fill="url(#riverGradient)" />
+        <motion.path
+          d="M-40 30 Q 20 18 80 30 T 200 30 T 320 30 T 440 30 V 80 H -40 Z"
+          fill="rgba(255,255,255,0.16)"
+          animate={drift}
+          transition={
+            reduceMotion ? undefined : { duration: 6, repeat: Infinity, ease: "easeInOut" }
+          }
+        />
+        <motion.path
+          d="M-40 48 Q 30 38 90 48 T 220 48 T 350 48 T 480 48 V 80 H -40 Z"
+          fill="rgba(255,255,255,0.1)"
+          animate={driftSlow}
+          transition={
+            reduceMotion ? undefined : { duration: 9, repeat: Infinity, ease: "easeInOut" }
+          }
+        />
+      </svg>
+    </div>
+  );
+}
+
+/**
  * The shared jungle scene — gradient sky, faint trees, swaying canopy vines,
- * drifting bananas, an animated river, and a forest floor of palms. Purely
- * decorative and non-interactive; render page content (including Punch's rock)
- * above it. Used by both the landing page and the game.
- *
- * The {@link River} is rendered before the jungle floor so it sits behind the
- * floor and any rock placed above the backdrop.
+ * drifting bananas, a flowing river beneath Punch's rock, and a forest floor of
+ * palms. Purely decorative and non-interactive; render page content above it.
+ * Used by both the landing page and the game.
  */
 export function JungleBackground() {
   return (

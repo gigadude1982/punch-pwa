@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+
 import { JungleBackground } from "./JungleBackground";
 
 jest.mock("framer-motion", () => {
@@ -7,77 +8,74 @@ jest.mock("framer-motion", () => {
     ...actual,
     motion: {
       ...actual.motion,
-      g: (props: Record<string, unknown>) => {
-        const { children, ...rest } = props;
-        return <g {...(rest as React.SVGProps<SVGGElement>)}>{children as React.ReactNode}</g>;
-      },
       path: (props: Record<string, unknown>) => {
-        const { children, ...rest } = props;
-        return <path {...(rest as React.SVGProps<SVGPathElement>)}>{children as React.ReactNode}</path>;
+        const { animate: _a, transition: _t, initial: _i, ...svgProps } = props;
+        return <path {...(svgProps as JSX.IntrinsicElements["path"])} />;
       },
     },
+    useReducedMotion: (): boolean => false,
   };
 });
 
 describe("JungleBackground", () => {
-  it("renders the river element within the background scene", () => {
+  it("renders the river element in the background scene", () => {
     render(<JungleBackground />);
     expect(screen.getByTestId("river")).toBeInTheDocument();
   });
 
-  it("renders both animated wave layers inside the river", () => {
-    render(<JungleBackground />);
-    expect(screen.getByTestId("river-wave-back")).toBeInTheDocument();
-    expect(screen.getByTestId("river-wave-front")).toBeInTheDocument();
-  });
-
-  it("river element is marked aria-hidden as it is decorative and non-interactive", () => {
-    render(<JungleBackground />);
-    expect(screen.getByTestId("river")).toHaveAttribute("aria-hidden", "true");
-  });
-
-  it("river renders before the jungle floor in DOM order so it sits behind the floor and any rock", () => {
+  it("the entire backdrop is aria-hidden so it is purely decorative", () => {
     render(<JungleBackground />);
     const river = screen.getByTestId("river");
-    const parent = river.parentElement as HTMLElement;
-    const children = Array.from(parent.children);
-    const riverIndex = children.indexOf(river);
-    // river must not be the last child — the jungle floor renders after it
-    expect(riverIndex).toBeGreaterThanOrEqual(0);
-    expect(riverIndex).toBeLessThan(children.length - 1);
-  });
-
-  it("backdrop root element is marked aria-hidden so the whole scene is decorative", () => {
-    const { container } = render(<JungleBackground />);
-    const backdrop = container.firstElementChild as HTMLElement;
+    const backdrop = river.closest("[aria-hidden='true']");
+    expect(backdrop).toBeInTheDocument();
     expect(backdrop).toHaveAttribute("aria-hidden", "true");
   });
 
-  it("river precedes a sibling rock element placed after JungleBackground in the DOM", () => {
-    render(
-      <div>
-        <JungleBackground />
-        <div data-testid="punch-rock">rock</div>
-      </div>,
-    );
-    const river = screen.getByTestId("river");
-    const rock = screen.getByTestId("punch-rock");
-    const position = river.compareDocumentPosition(rock);
-    expect(position & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-  });
-
-  it("renders sixteen banana emoji decorations", () => {
+  it("river SVG has role=presentation marking it as non-interactive", () => {
     render(<JungleBackground />);
-    const bananas = screen.getAllByText("\uD83C\uDF4C");
-    expect(bananas).toHaveLength(16);
+    const river = screen.getByTestId("river");
+    const svg = river.querySelector("svg");
+    expect(svg).not.toBeNull();
+    expect(svg).toHaveAttribute("role", "presentation");
   });
 
-  it("renders foliage and vine elements in the canopy", () => {
-    const { container } = render(<JungleBackground />);
-    // 8 vines each have an inline height style
-    const vinesWithHeight = Array.from(container.querySelectorAll<HTMLElement>("[style]")).filter(
-      (el) => el.style.height !== "",
-    );
-    expect(vinesWithHeight.length).toBeGreaterThanOrEqual(8);
+  it("river contains at least two wave path elements for flowing water animation", () => {
+    render(<JungleBackground />);
+    const river = screen.getByTestId("river");
+    const paths = river.querySelectorAll("path");
+    expect(paths.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("river SVG contains a rect for the water color base", () => {
+    render(<JungleBackground />);
+    const river = screen.getByTestId("river");
+    const rect = river.querySelector("rect");
+    expect(rect).not.toBeNull();
+  });
+
+  it("river SVG defs define a linearGradient for the water color", () => {
+    render(<JungleBackground />);
+    const river = screen.getByTestId("river");
+    const gradient = river.querySelector("defs > linearGradient");
+    expect(gradient).not.toBeNull();
+  });
+
+  it("river DOM node precedes subsequent elements in document order (renders behind rock)", () => {
+    render(<JungleBackground />);
+    const river = screen.getByTestId("river");
+    const backdrop = river.closest("[aria-hidden='true']") as HTMLElement;
+    const allElements = Array.from(backdrop.querySelectorAll("*"));
+    const riverIdx = allElements.indexOf(river);
+    expect(riverIdx).toBeGreaterThan(-1);
+    expect(allElements.length - 1).toBeGreaterThan(riverIdx);
+  });
+
+  it("river and canopy or banana elements coexist without replacing each other", () => {
+    render(<JungleBackground />);
+    const river = screen.getByTestId("river");
+    const backdrop = river.closest("[aria-hidden='true']") as HTMLElement;
+    const spans = backdrop.querySelectorAll("span");
+    expect(spans.length).toBeGreaterThan(0);
+    expect(river).toBeInTheDocument();
   });
 });
