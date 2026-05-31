@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Landing } from "./components/Landing";
 import { JungleBackground } from "./components/JungleBackground";
+import { Footer } from "./components/Footer";
 import { Game } from "./components/Game";
 import { GameProvider } from "./game/GameProvider";
 import styles from "./App.module.css";
@@ -37,6 +38,7 @@ function App({ enablePlay }: AppProps) {
           <GameProvider>
             <Game />
           </GameProvider>
+          <Footer />
         </motion.main>
       )}
     </AnimatePresence>
