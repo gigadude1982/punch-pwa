@@ -5,6 +5,15 @@
   gap: 1.75rem;
 }
 
+.bananaStock {
+  margin: -0.5rem 0 -0.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff8e7;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
 .actions {
   display: flex;
   gap: 0.75rem;

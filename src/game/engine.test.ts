@@ -1,4 +1,6 @@
 import {
+  BANANA_MAX,
+  BANANA_REGEN_PER_MINUTE,
   FEED_AMOUNT,
   FULLNESS_DECAY_PER_MINUTE,
   HAPPINESS_DECAY_PER_MINUTE,
@@ -16,9 +18,17 @@ import {
 } from "./engine";
 import { STAT_MAX, type PetState } from "./types";
 
-/** A healthy pet at the given fullness/happiness, for terse test setup. */
+/** A healthy pet at the given fullness/happiness, with bananas on hand. */
 function pet(overrides: Partial<PetState> = {}): PetState {
-  return { fullness: 50, happiness: 50, lastTick: 0, sick: false, overfeed: 0, ...overrides };
+  return {
+    fullness: 50,
+    happiness: 50,
+    bananas: BANANA_MAX,
+    lastTick: 0,
+    sick: false,
+    overfeed: 0,
+    ...overrides,
+  };
 }
 
 describe("clamp", () => {
@@ -35,6 +45,7 @@ describe("createInitialState", () => {
     expect(state).toEqual({
       fullness: 100,
       happiness: 100,
+      bananas: BANANA_MAX,
       lastTick: 1_000,
       sick: false,
       overfeed: 0,
@@ -66,6 +77,11 @@ describe("applyDecay", () => {
     const state = pet({ fullness: 50, lastTick: 1_000 });
     expect(applyDecay(state, 1_000)).toBe(state);
     expect(applyDecay(state, 0).fullness).toBe(50); // negative elapsed floored at 0
+  });
+
+  it("regrows bananas over time, capped at the bunch size", () => {
+    expect(applyDecay(pet({ bananas: 2 }), 2 * 60_000).bananas).toBe(2 + 2 * BANANA_REGEN_PER_MINUTE);
+    expect(applyDecay(pet({ bananas: BANANA_MAX - 0.1 }), 60 * 60_000).bananas).toBe(BANANA_MAX);
   });
 
   it("keeps the over-feed streak while he's still too full for a full portion", () => {
@@ -114,6 +130,19 @@ describe("feed", () => {
   it("ignores feeding while sick", () => {
     const sick = pet({ fullness: SICK_FULLNESS, sick: true });
     expect(feed(sick)).toBe(sick);
+  });
+
+  it("consumes one banana per feed", () => {
+    expect(feed(pet({ fullness: 40, bananas: 5 })).bananas).toBe(4);
+    // Still spends a banana when the feed overflows / over-feeds.
+    expect(feed(pet({ fullness: 100, bananas: 5 })).bananas).toBe(4);
+  });
+
+  it("does nothing when out of bananas (returns the same state)", () => {
+    const empty = pet({ fullness: 40, bananas: 0 });
+    expect(feed(empty)).toBe(empty);
+    const almost = pet({ fullness: 40, bananas: 0.5 }); // less than a whole banana
+    expect(feed(almost)).toBe(almost);
   });
 
   it("still makes him sick when mashed in the live loop (decay before each press)", () => {
