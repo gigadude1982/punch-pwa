@@ -2,15 +2,8 @@ import { render, screen } from "@testing-library/react";
 import { Footer } from "./Footer";
 import pkg from "../../package.json";
 
-/**
- * Helper: (re-)define the build-time constant __APP_VERSION__ on globalThis
- * for the duration of a test. Jest runs in jsdom where Vite's `define` plugin
- * never executes, so we inject the value ourselves.
- *
- * Object.defineProperty is used so we can set `undefined` as well as a string,
- * and so repeated calls in the same test file do not throw about redefining a
- * non-configurable property.
- */
+declare const __APP_VERSION__: string | undefined;
+
 function setAppVersion(value: string | undefined): void {
   Object.defineProperty(globalThis, "__APP_VERSION__", {
     value,
@@ -44,7 +37,7 @@ describe("Footer", () => {
       expect(versionEl).toHaveTextContent("v0.0.1");
     });
 
-    it("renders the version dynamically from package.json with a 'v' prefix", () => {
+    it("renders the version from package.json with a 'v' prefix", () => {
       setAppVersion(pkg.version);
 
       render(<Footer />);
@@ -53,11 +46,11 @@ describe("Footer", () => {
       expect(versionEl).toHaveTextContent(`v${pkg.version}`);
     });
 
-    it("has package.json version set to 1.0.2", () => {
+    it("reads version 1.0.2 from package.json", () => {
       expect(pkg.version).toBe("1.0.2");
     });
 
-    it("renders 'v1.0.2' when __APP_VERSION__ is set to the current package version", () => {
+    it("renders 'v1.0.2' in the footer when __APP_VERSION__ is set to 1.0.2", () => {
       setAppVersion("1.0.2");
 
       render(<Footer />);
